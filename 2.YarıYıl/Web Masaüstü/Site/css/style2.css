@@ -1,0 +1,135 @@
+.iletisim {
+    background-color: #ffffff;
+    padding: none;
+    margin-top: 40px;
+    font-weight: 100px;
+    width: 100%;
+}
+
+.edu {
+    margin-left: 45%;
+    margin-right: 45%;
+    background-color: white;
+    width: 10%;
+}
+
+.city {
+    margin-left: 45%;
+    margin-right: 40%;
+    background-color: white;
+}
+
+.gender {
+    margin-left: 45%;
+    margin-right: 40%;
+    background-color: white;
+}
+
+.name {
+    width: auto;
+    margin-left: 45%;
+    margin-right: 40%;
+    background-color: white;
+}
+
+.lang {
+    margin-left: 45%;
+    margin-right: 40%;
+    background-color: white;
+}
+
+.mesaj {
+    margin-left: 45%;
+    margin-right: 40%;
+    background-color: white;
+}
+
+.buton {
+    margin-left: 45%;
+    margin-right: 40%;
+    max-width: 180px;
+    background-color: rgb(255, 255, 255);
+    padding-left: 1%;
+}
+
+.edu_header_figure {
+    float: right;
+    width: 21%;
+}
+
+.edu_main {
+    clear: both;
+    width: 80%
+}
+
+.edu_nav {
+    width: 75%;
+    float: left;
+    margin-top: 50px;
+    margin-left: 20px;
+}
+
+.edu_article {
+    margin-left: 25px;
+}
+
+.edu_footer {
+    text-align: center;
+}
+
+.sehrim_slider {
+    height: 700px;
+}
+
+.hakkimda .trabzon .yahya {
+    border: none;
+    border-top: 3px solid #343a40;
+    max-width: 250px;
+    margin: 25px auto;
+    color: black;
+}
+
+.metin {
+    text-align: left;
+}
+
+.mirasimiz_baslik {
+    padding-top: 5px;
+    width: 100%;
+    text-align: center;
+}
+
+.sumela {
+    width: 80%;
+    position: relative;
+    margin: auto;
+}
+
+.sumela_tarihce {
+    width: 80%;
+    position: relative;
+    margin: auto;
+}
+
+.freskler {
+    width: 80%;
+    position: relative;
+    margin: auto;
+}
+
+.sumela_hakkinda {
+    width: 600px;
+    height: 450px;
+    position: relative;
+    margin: auto;
+}
+
+.sumela_foto {
+    width: 80%;
+    position: relative;
+    margin: auto;
+}
+
+.figure :hover {
+    opacity: 0.8;
+}

@@ -1,0 +1,6 @@
+﻿  G201210012 Yahya Haliloğlu.cpp
+C:\Users\asus\Desktop\PG Ödev\G201210012 Yahya Haliloğlu\G201210012 Yahya Haliloğlu\G201210012 Yahya Haliloğlu.cpp(25,12): warning C4244: 'bağımsız değişken': 'time_t' - 'unsigned int' dönüşümü; veri kaybı olabilir
+C:\Users\asus\Desktop\PG Ödev\G201210012 Yahya Haliloğlu\G201210012 Yahya Haliloğlu\G201210012 Yahya Haliloğlu.cpp(44,11): warning C4018: '>': imzalı/imzasız uyuşmazlığı
+C:\Users\asus\Desktop\PG Ödev\G201210012 Yahya Haliloğlu\G201210012 Yahya Haliloğlu\G201210012 Yahya Haliloğlu.cpp(50,11): warning C4018: '<': imzalı/imzasız uyuşmazlığı
+C:\Users\asus\Desktop\PG Ödev\G201210012 Yahya Haliloğlu\G201210012 Yahya Haliloğlu\G201210012 Yahya Haliloğlu.cpp(81,20): warning C4018: '>': imzalı/imzasız uyuşmazlığı
+  G201210012 Yahya Haliloğlu.vcxproj -> C:\Users\asus\Desktop\PG Ödev\G201210012 Yahya Haliloğlu\Debug\G201210012 Yahya Haliloğlu.exe

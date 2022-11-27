@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style2.css">
+    <title>iletisim</title>
+</head>
+
+<body>
+    <!--NAVBAR   Menu Başlangıç  NAVBAR-->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">İletişim</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNavDropdown">
+                <ul class="navbar-nav">
+                    <!--<li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="indexBootstrap.html">Anasayfa</a>
+                    </li>-->
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- NAVBAR   Menü Bitiş   NAVBAR-->
+    <div class="iletisim">
+        <form action="form.php" method="POST">
+            <div>
+
+            </div>
+
+
+            <div class="name">
+                <h3> İletişim Formu</h3>
+                <input type="text" placeholder="Adınız Ve Soyadınız" name="ad"> <br><br>
+                <input type="email" placeholder="Mail Adresiniz (@)" name="mail"> <br>
+            </div>
+
+            <br><br>
+            <div class="gender">
+                Cinsiyet:<br>
+                <input type="radio" name="cinsiyet" value="erkek" checked>Erkek<br>
+                <input type="radio" name="cinsiyet" value="kadin">Kadın <br>
+                <input type="radio" name="cinsiyet" value="diger">Belirtmek İstemiyor
+            </div>
+            <br><br><br>
+            <div class="edu">
+                <input type="text" list="Eğitim" placeholder="Eğitim Durumunuz" name="edc">
+                <datalist id="Eğitim">
+                <option name="1"  value="İlkokul">1' den 4' e kadar</option>
+                <option name="2" value="Ortaokul">5' den 8' e kadar</option>
+                <option name="3" value="Lise">9' dan 12' e kadar</option>
+                <option name="4" value="Üniversite">Önlisans</option>
+                <option name="5" value="Üniversite">Lisans</option>
+                <option name="6" value="Üniversite">YükeskLisans</option>
+            </datalist>
+            </div>
+            <br><br><br>
+
+
+
+            <div class="lang">
+                Hakim Diller:<br>
+                <input type="checkbox" name="dil[]" value="C-">C<br>
+                <input type="checkbox" name="dil[]" value=" PHP -">PHP<br>
+                <input type="checkbox" name="dil[]" value=" Java -">Java<br>
+                <input type="checkbox" name="dil[]" value=" Python -">Python<br>
+                <input type="checkbox" name="dil[]" value=" VB -">Visual Basic<br>
+                <input type="checkbox" name="dil[]" value=" JavaScript -">JavaScript<br>
+                <input type="checkbox" name="dil[]" value=" Pascal -">Pascal<br>
+                <input type="checkbox" name="dil[]" value=" HTML">HTML<br>
+            </div>
+            <br>
+            <br>
+            <br>
+
+            <div class="city">
+                Şehir :<br>
+                <select name="sehrim">
+                <option value="Adana">Adana</option>
+                <option value="Adıyaman">Adıyaman</option>
+                <option value="Afyonkarahisar">Afyonkarahisar</option>
+                <option value="Ağrı">Ağrı</option>
+                <option value="Amasya">Amasya</option>
+                <option value="Ankara">Ankara</option>
+                <option value="Antalya">Antalya</option>
+                <option value="Artvin">Artvin</option>
+                <option value="Aydın">Aydın</option>
+                <option value="Balıkesir">Balıkesir</option>
+                <option value="Bilecik">Bilecik</option>
+                <option value="Bingöl">Bingöl</option>
+                <option value="Bitlis">Bitlis</option>
+                <option value="Bolu">Bolu</option>
+                <option value="Burdur">Burdur</option>
+                <option value="Bursa">Bursa</option>
+                <option value="Çanakkakle">Çanakkakle</option>
+                <option value="Çankırı">Çankırı</option>
+                <option value="Çorum">Çorum</option>
+                <option value="Denizli">Denizli</option>
+                <option value="Diyarbakır">Diyarbakır</option>
+                <option value="Edirne">Edirne</option>
+                <option value="Elazığ">Elazığ</option>
+                <option value="Erzincan">Erzincan</option>
+                <option value="Erzurum">Erzurum</option>
+                <option value="Eskişehir">Eskişehir</option>
+                <option value="Gaziantep">Gaziantep</option>
+                <option value="Giresun">Giresun</option>
+                <option value="Gümüşhane">Gümüşhane</option>
+                <option value="Hakkari">Hakkari</option>
+                <option value="Hatay">Hatay</option>
+                <option value="Isparta">Isparta</option>
+                <option value="Mersin">Mersin(İçel)</option>
+                <option value="İstanbul">İstanbul</option>
+                <option value="İzmir">İzmir</option>
+                <option value="Kars">Kars</option>
+                <option value="Kastamonu">Kastamonu</option>
+                <option value="Kayseri">Kayseri</option>
+                <option value="Kırklareli">Kırklareli</option>
+                <option value="Kırşehir">Kırşehir</option>
+                <option value="Kocaeli">Kocaeli</option>
+                <option value="Konya">Konya</option>
+                <option value="Kütahya">Kütahya</option>
+                <option value="Malatya">Malatya</option>
+                <option value="Manisa">Manisa</option>
+                <option value="Kahramanmaraş">Kahramanmaraş</option>
+                <option value="Mardin">Mardin</option>
+                <option value="Muğla">Muğla</option>
+                <option value="Muş">Muş</option>
+                <option value="Nevşehir">Nevşehir</option>
+                <option value="Niğde">Niğde</option>
+                <option value="Ordu">Ordu</option>
+                <option value="Rize">Rize</option>
+                <option value="Sakarya" selected>Sakarya</option>
+                <option value="Samsun">Samsun</option>
+                <option value="Siirt">Siirt</option>
+                <option value="Sinop">Sinop</option>
+                <option value="Sivas">Sivas</option>
+                <option value="Tekirdağ">Tekirdağ</option>
+                <option value="Tokat">Tokat</option>
+                <option value="Trabzon">Trabzon</option>
+                <option value="Tunceli">Tunceli</option>
+                <option value="Şanlıurfa">Şanlıurfa</option>
+                <option value="Uşak">Uşak</option>
+                <option value="Van">Van</option>
+                <option value="Yozgat">Yozgat</option>
+                <option value="Zonguldak">Zonguldak</option>
+                <option value="Aksaray">Aksaray</option>
+                <option value="Bayburt">Bayburt</option>
+                <option value="Karaman">Karaman</option>
+                <option value="Kırıkkale">Kırıkkale</option>
+                <option value="Batman">Batman</option>
+                <option value="Şırnak">Şırnak</option>
+                <option value="Bartın">Bartın</option>
+                <option value="Ardahan">Ardahan</option>
+                <option value="Iğdır">Iğdır</option>
+                <option value="Yalova">Yalova</option>
+                <option value="Karabük">Karabük</option>
+                <option value="Kilis">Kilis</option>
+                <option value="Osmaniye">Osmaniye</option>
+                <option value="Düzce">Düzce</option>
+            </select>
+            </div>
+            <br>
+            <br>
+            <br>
+            <div class="mesaj">
+                <textarea name="mesaj" rows="10" cols="20" placeholder="Mesajınız buraya yazınız."></textarea>
+
+            </div>
+            <br>
+            <br>
+            <br>
+            <div class="buton">
+                <input type="submit" value="Gönder">
+                <input type="reset" name "reset" value="Sıfırla">
+
+            </div>
+
+        </form>
+    </div>
+
+
+
+    <br>
+    <br>
+    <br>
+
+
+</body>
+
+</html>
