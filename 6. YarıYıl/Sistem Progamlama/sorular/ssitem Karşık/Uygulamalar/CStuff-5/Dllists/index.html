@@ -1,0 +1,555 @@
+<title>CS360 Lecture notes -- Doubly Linked Lists</title>
+<body bgcolor=ffffff>
+<h1><a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs360>CS360</a>
+Lecture notes -- Doubly Linked Lists</h1>
+<LI><a href=http://web.eecs.utk.edu/~jplank>James S. Plank</a>
+<LI>Directory: <b>~jplank/plank/classes/cs360/360/www-home/notes/Dllists</b>
+<LI>Lecture notes:
+    <a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs360/360/notes/Dllists>
+    <b>http://web.eecs.utk.edu/~jplank/plank/classes/cs360/360/notes/Dllists</b></a>
+<LI>
+Original notes: <i>Wed Aug 25 10:14:37 EDT 1999</i>
+<LI> Last modified: <i>
+Fri Jan 29 17:46:40 EST 2021
+</i>
+
+
+<hr>
+<h2>Doubly Linked Lists</h2>
+
+Doubly linked lists ("dllists") are extremely useful in C, because they let you store
+data when you don't know how much data you have.  In C++, they are less useful
+because you can call <b>push_back()</b> on vectors.  You don't get vectors
+or <b>push_back()</b> in C, so you'll find dllists realy handy.
+<p>
+With a doubly linked list, each node has two pointers --
+one to the next node in the list, and one to the previous
+node.  Additionally, each list has an extra node called a "sentinel" node.
+This makes life nice in many ways:
+
+<UL>
+<LI> You can traverse lists forward and backward.
+<LI> You can insert anywhere in a list easily.  This includes
+     inserting before a node, after a node, at the front of
+     the list, and at the end of the list.
+<LI> You can delete nodes very easily.
+</UL>
+
+The API for dllists is in 
+<a href=dllist.h><b>dllist.h</b></a>.  
+It defines a doubly-linked list node:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+typedef struct dllist {
+  struct dllist *flink;
+  struct dllist *blink;
+  Jval val;
+} *Dllist;
+</pre></td></table></center><p>
+<p>
+Here are the essential operations supported:
+
+<UL>
+<LI> <b>Dllist new_dllist()</b>: Allocates and returns a new doubly linked list.
+<LI> <b>free_dllist(Dllist l)</b>: Destroys the list, calling <b>free()</b>
+      on all allocated memory in the list.  The list does not have to
+      be empty.
+<LI> <b>dll_prepend(Dllist l, Jval val)</b>:
+       Adds a new node at the beginning of the list.
+        This node's value is <b>val</b>.  <b>Dll_prepend()</b> has
+        no return value.
+<LI> <b>dll_append(Dllist l, Jval val)</b>:
+       Adds a new node at the end of the list.
+        This node's value is <b>val</b>.  <b>Dll_append()</b> has
+        no return value.
+<LI> <b>dll_insert_b(Dllist n, Jval val)</b>: 
+     Adds a new node to the list 
+     right before the specified node.
+      This node's value is <b>val</b>.
+<LI> <b>dll_insert_a(Dllist n, Jval val)</b>: 
+     Adds a new node to the list 
+     right after the specified node.
+      This node's value is <b>val</b>.
+<LI> <b>dll_delete_node(Dllist)</b>: Deletes the given node from the list.
+     Don't call this on the sentinel.
+<LI> <b>int dll_empty(Dllist l)</b>: Returns whether <b>l</b> is empty.
+</UL>
+These are also supported, but they are not, in my opinion, essential, so I won't
+bother going over them in class.
+<UL>
+<LI> <b>Dllist dll_nil(Dllist l)</b>: Returns a pointer to the <b>nil</b> 
+     (sentinel) node
+     for the list.  You can think of <b>nil</b> as a node with no value, that
+     begins and ends the list.  Since <b>l</b> points to the sentinel 
+     node, <b>dll_nil</b> returns <b>l</b>.  You don't need to call
+     <b>dll_nil()</b> to access the sentinel node.  You can just use
+     <b>l</b>, although it makes your code more readable if you use
+     <b>dll_nil()</b>.
+<LI> <b>Dllist dll_first(Dllist l)</b>: Returns a pointer to the first node
+     in the list.  
+     If the list is empty, this returns the sentinel.  
+     As with <b>dll_nil()</b>, you don't need to call <b>dll_first(l)</b> --
+     you can just use <b>l->flink</b>.
+<LI> <b>Dllist dll_last(Dllist l)</b>: Returns a pointer to the last node
+     in the list.  
+     If the list is empty, this returns the sentinel.  As
+     with <b>dll_nil()</b>, you don't need to call <b>dll_last(l)</b> --
+     you can just use <b>l->blink</b>.
+<LI> <b>Dllist dll_next(Dllist n)</b>: Returns a pointer to the next node
+     in the list after <b>n</b>.  
+     If <b>n</b> is the last node on the list,
+     then <b>dll_next(n)</b> returns the sentinel.
+     As with <b>dll_first()</b>, you don't need to call <b>dll_next(n)</b> --
+     you can just use <b>n->flink</b>.
+<LI> <b>Dllist dll_prev(Dllist n)</b>: Returns a pointer to the previous node
+     in the list before <b>n</b>.  
+     If <b>n</b> is the first node on the list,
+     then <b>dll_prev(n)</b> returns the sentinel.
+     As with <b>dll_last()</b>, you don't need to call <b>dll_prev(n)</b> --
+     you can just use <b>n->blink</b>.
+<LI> <b>Jval dll_val(Dllist n)</b>: Returns node <b>n</b>'s <b>val</b> 
+     field.  Again, you don't need to use this, but sometimes it comes
+     in handy.
+<LI> <b>int dll_delete_node(Dllist n)</b>: Deletes and frees node <b>n</b>.
+</UL>
+
+Finally, there are two macros for traversing <b>dllists</b> forwards
+and backwards.  <b>ptr</b> should be a <b>Dllist</b> and <b>list</b>
+should be a <b>Dllist</b>:
+<pre>
+#define dll_traverse(ptr, list) \
+  for (ptr = (list)->flink; ptr != (list); ptr = ptr->flink)
+#define dll_rtraverse(ptr, list) \
+  for (ptr = (list)->blink; ptr != (list); ptr = ptr->blink)
+</pre>
+
+These are super-convenient -- I'll show you how to use them below.
+
+<hr>
+<h2>The Structure of Dllists</h2>
+
+As mentioned above, the implementation of each <b>dllist</b> is as a circular doubly-linked 
+list with a sentinel node.  The code is in
+<a href=../Libfdr/src/dllist.c><b>../Libfdr/src/dllist.c</b></a>.
+<p>
+Once again, the <b>typedef</b> for a <b>dllist</b> node is:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+typedef struct dllist {
+  struct dllist *flink;
+  struct dllist *blink;
+  Jval val;
+} *Dllist;
+</pre></td></table></center><p>
+
+Note that each node has two pointers -- a forward link (<b>flink</b>) to 
+the next node on the list, and a backward link (<b>blink</b>) to the 
+previous node on the list. Once you have created a <b>dllist</b>, you'll
+keep a pointer to the sentinel node.
+<p>
+The list is circular in both directions -- the sentinel's <b>flink</b>
+points to the first node on the list, and its <b>blink</b> points
+to the last node on the list.  The first node's <b>blink</b> points to
+the sentinel, as does the last node's <b>flink</b>.
+<p>
+Some ascii art:  Here's an empty list <b>l</b>, that would be returned from <b>new_dllist()</b>:
+<pre>
+l ----------------> |-----------|
+               /--->| flink ---------\
+               | /->| blink -------\ |
+               | |  | val = ?   |  | |
+               | |  |-----------|  | |
+               | |                 | |
+               | \-----------------/ |
+               |                     |
+               \---------------------/
+</pre>
+And here's that list after calling <b>dll_append(l, new_jval_i(3));</b>:
+(or <b>dll_prepend(l, new_jval_i(3))</b> for that matter).
+<pre>
+l ----------------> |-----------|       |-----------|
+               /--->| flink ----------->| flink ---------\
+               | /->| blink ----------->| blink -------\ |
+               | |  | val = ?   |       | val.i = 3 |  | |
+               | |  |-----------|       |-----------|  | |
+               | |                                     | |
+               | \-------------------------------------/ |
+               |                                         |
+               \-----------------------------------------/
+</pre>
+Actually, it makes the drawing cleaner to have the back links go backwards:
+<pre>
+l ----------------->|-----------|       |-----------|
+               /--->| flink ----------->| flink ---------\
+               |  /------ blink |<----------- blink |<-\ |
+               |  | | val = ?   |       | val.i = 3 |  | |
+               |  | |-----------|       |-----------|  | |
+               |  |                                    | |
+               |  \------------------------------------/ |
+               |                                         |
+               \-----------------------------------------/
+</pre>
+Here's that list after calling <b>dll_append(l, new_jval_i(5));</b>:
+<pre>
+l ---------->|-----------|       |-----------|       |-----------|
+        /--->| flink ----------->| flink ----------->| flink ---------\
+        |  /------ blink |<----------- blink |<----------- blink |<-\ |
+        |  | | val = ?   |       | val.i = 3 |       | val.i = 5 |  | |
+        |  | |-----------|       |-----------|       |-----------|  | |
+        |  |                                                        | |
+        |  \--------------------------------------------------------/ |
+        |                                                             |
+        \-------------------------------------------------------------/
+</pre>
+
+I won't go over more examples with ascii art.  I assume you are getting the hang of it.
+<p>
+<hr>
+<h2>Usage examples</h2>
+
+The first example is one of our standards: reversing standard 
+input. This is simple enough to need no explanation.
+It's in 
+<b><a href=src/dllreverse.c>src/dllreverse.c</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* Printing the lines of standard input in reverse order, by appending
+   to a dllist, and then printing the dllist backward. */</font>
+
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include "fields.h"
+#include "dllist.h"
+
+int main()
+{
+  IS is;
+  Dllist l;
+  Dllist tmp;
+
+  is = new_inputstruct(NULL);
+  l = new_dllist();
+
+  while (get_line(is) &gt;= 0) {
+    dll_append(l, new_jval_s(strdup(is-&gt;text1)));
+  }
+
+  <font color=blue>/* Notice how convenient this macro is! */</font>
+
+  dll_rtraverse(tmp, l) printf("%s", tmp-&gt;val.s);
+  return 0;
+}
+</pre></td></table></center><p>
+
+The second example is another standard: printing the last
+<b>n</b> lines of standard input.  We do this by reading
+standard input into a <b>Dllist</b>, and making sure that
+the <b>Dllist</b> always has at most <b>n</b> nodes.  Then
+we print it out.  The code is in 
+<b><a href=src/dlltail.c>src/dlltail.c</a></b>.
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* This program implements tail using a dllist.  It reads lines onto the dllist until
+   it contains the proper number of lines.  Then, each time it reads a line, it appends
+   to the dllist and then deletes the first line of the dllist.  At the end, it simply
+   prints the dllist. */</font>
+
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "fields.h"
+#include "dllist.h"
+
+int main(int argc, char **argv)
+{
+  IS is;
+  int n;
+  Dllist l;
+  Dllist tmp;
+
+  <font color=blue>/* Error check and read the number of lines to maintain. */</font>
+
+  if (argc != 2) {
+    fprintf(stderr, "usage: dlltail n\n");
+    exit(1);
+  }
+  n = atoi(argv[1]);
+  if (n &lt; 0) {
+    fprintf(stderr, "usage: dlltail n  -- n must be &gt;= 0\n");
+    exit(1);
+  }
+
+  <font color=blue>/* Create the inputstruct and dllist */</font>
+
+  is = new_inputstruct(NULL);
+  l = new_dllist();
+
+  <font color=blue>/* Read each line and append to the dllist. */</font>
+
+  while (get_line(is) &gt;= 0) {
+    dll_append(l, new_jval_s(strdup(is-&gt;text1)));
+
+    if (is-&gt;line &gt; n) {          <font color=blue>/* If the dllist is too big, delete the first line on it. */</font>
+      free(l-&gt;flink-&gt;val.s);     <font color=blue>/* You have to free it, becuase you called strdup() to create it. */</font>
+      dll_delete_node(l-&gt;flink);
+    }
+  }
+
+  <font color=blue>/* At the end, print the dllist -- again note the convenience of dll_traverse. */</font>
+
+  dll_traverse(tmp, l) printf("%s", tmp-&gt;val.s);
+  return 0;
+}
+</pre></td></table></center><p>
+
+A couple of notes about this program.  First, you have to call <b>strdup()</b> to copy
+the string that you have read from standard input.  Otherwise, <b>get_line()</b> will 
+overwrite the string, and all of your lines will be the same (we've gone over this 
+concept multiple times, but I like to keep hammering the point home).
+<p>
+Second, when you call <b>dll_delete_node()</b> it removes the node from the list and
+frees the node.  However, if the <b>val</b> field points to data that has been allocated
+with <b>malloc()</b>, then that data is not freed automatically.  That is because the
+<b>dllist</b> library has no idea what the data is.  Perhaps you want it freed, or 
+perhaps you don't, because it is on mutiple data structures. 
+<p>
+In this program, you most definitely want to free the data -- suppose you read a file
+that has 10G worth of text and you simply want to read the last 10 lines -- if you 
+don't free the data when you delete a node, you'll burn 10G of memory.
+If you do free the data, then you only store 10 lines in memory at a time.
+<p>
+<hr>
+<h2>A Last Example</h2>
+
+The following assignment is from CS202, in C++:
+
+<p><center><table border=3 cellpadding=3><td>
+<h3>COS: Columns of strings and doubles</h3>
+
+You're going to hate this program.  Sorry.  You are going to write <b>cos.cpp</b>.  This reads words
+from standard input and partitions them into doubles and non-doubles.  On line 1, it will
+print the first non-double and the first double.  On line 2, it will print the second non-double
+and the second double.  And so on.  The format of each line should be:
+<p>
+<UL>
+<LI> The non-double, padded to 30 characters and left justified.
+<LI> A space.
+<LI> The double, padded to 20 characters, right justified with four digits after the
+decimal point.
+</UL>
+<p>
+Thus, each line will be 51 characters.  If there are the same number of doubles and non-doubles,
+then life is easy.  However, if there are more doubles than non-doubles, you simply print 
+30 spaces when you get to the lines that have no non-doubles.  If there are more non-doubles than
+doubles, then you simply print 20 spaces where the double would go.
+<p>
+You may assume that the words in standard input are 30 characters or less.
+<p>
+Examples:
+
+<pre>
+UNIX> <font color=darkred><b>cat txt/input1.txt</b></font>
+1 Fred 2 3 Binky Dontonio
+UNIX> <font color=darkred><b>bin/cos < txt/input1.txt</b></font>
+Fred                                         1.0000
+Binky                                        2.0000
+Dontonio                                     3.0000
+UNIX> <font color=darkred><b>cat txt/input2.txt</b></font>
+1 2 3 Fred
+UNIX> <font color=darkred><b>cos < txt/input2.txt</b></font>
+Fred                                         1.0000
+                                             2.0000
+                                             3.0000
+UNIX> <font color=darkred><b>cat txt/input3.txt</b></font>
+1 2 Fred Binky Dontonio
+UNIX> <font color=darkred><b>bin/cos < txt/input3.txt</b></font>
+Fred                                         1.0000
+Binky                                        2.0000
+Dontonio                                           
+UNIX> <font color=darkred><b>bin/cos < txt/input3.txt | cat -e</b></font>
+Fred                                         1.0000$
+Binky                                        2.0000$
+Dontonio                                           $
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+In case you're wondering, "cat -e" prints standard input on standard output
+and puts a '$' at the end of the line.
+It's nice to be able to see spaces at the end of a line.
+</td></table></center><p>
+
+The solution is to use two Dllists -- one for doubles and one for strings.  
+When you read stdin, you use <b>sscanf()</b> to determine if a word is a double,
+and if it is, you put it on the double lists.  Otherwise, you call <b>strdup()</b>
+and put the string on the string lists.  Then you print out in three phases.
+In the first, you print all the lines which have both doubles and strings.  When
+you're done with that loop, you may have doubles or strings leftover.  The remaining
+two loops handle each case.  The code is in
+<b><a href=src/cos.c>src/cos.c</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* This program reads words and puts each word onto one of two lists.  If the word is
+   a double, it puts it on one list.  If it's not, it puts it on the other list.  It
+   then prints the two lists in two columns, formatted.  Please see the lecture notes
+   for a precise definition of the format. */</font>
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include "fields.h"
+#include "dllist.h"
+
+int main()
+{
+  Dllist dl, dtmp;  <font color=blue>/* The list for doubles */</font>
+  Dllist sl, stmp;  <font color=blue>/* The list for strings */</font>
+  double d;
+  int i;
+  IS is;
+
+  <font color=blue>/* Create the lists and the inputstruct */</font>
+
+  dl = new_dllist();
+  sl = new_dllist();
+  is = new_inputstruct(NULL);
+
+  <font color=blue>/* Append to the two lists, using sscanf to differentiate between numbers and strings. */</font>
+
+  while (get_line(is) &gt;= 0) {
+    for (i = 0; i &lt; is-&gt;NF; i++) {
+      if (sscanf(is-&gt;fields[i], "%lf", &d) == 1) {
+        dll_append(dl, new_jval_d(d));
+      } else {
+        dll_append(sl, new_jval_s(strdup(is-&gt;fields[i])));
+      }
+    }
+  }
+
+  <font color=blue>/* Print the lines that have both doubles and strings.   </font>
+  <font color=blue>   You'll note -- I'm using the sentinel to test for the end of each list */</font>
+
+  dtmp = dl-&gt;flink;
+  stmp = sl-&gt;flink;
+  while (dtmp != dl && stmp != sl) {
+    printf("%-30s %20.4lf\n", stmp-&gt;val.s, dtmp-&gt;val.d);
+    dtmp = dtmp-&gt;flink;
+    stmp = stmp-&gt;flink;
+  }
+
+  <font color=blue>/* Now print the lines that have strings only: */</font>
+
+  while (stmp != sl) {
+    printf("%-30s %20s\n", stmp-&gt;val.s, "");
+    stmp = stmp-&gt;flink;
+  }
+
+  <font color=blue>/* And print the lines that have doubles only: */</font>
+
+  while (dtmp != dl) {
+    printf("%-30s %20.4lf\n", "", dtmp-&gt;val.d);
+    dtmp = dtmp-&gt;flink;
+  }
+
+  return 0;
+}
+</pre></td></table></center><p>
+
+<hr>
+<h3>Implementation Details</h3>
+
+<font color=darkred>I don't go over this in class, because it should be review from 
+CS202.  However, I keep it in the lecture notes in case you want some review on 
+implementing doubly-linked lists.  I haven't touched these notes since 1998, so they
+may feature some old-school C.  Sorry.</font>
+<p>
+Many of the procedure implementations are trivial procedures or macros:
+<pre>
+<hr> 
+Dllist new_dllist()
+{
+  Dllist d;
+
+  d = (Dllist) malloc (sizeof(struct dllist));
+  d->flink = d;
+  d->blink = d;
+  return d;
+}
+<hr>
+dll_empty(Dllist l)
+{
+  return (l->flink == l);
+}
+
+<hr>
+free_dllist(Dllist l)
+{
+  while (!dll_empty(l)) {
+    dll_delete_node(dll_first(l));
+  }
+  free(l);
+}
+<hr>
+
+#define dll_first(d) ((d)->flink)
+#define dll_next(d) ((d)->flink)
+#define dll_last(d) ((d)->blink)
+#define dll_prev(d) ((d)->blink)
+#define dll_nil(d) (d)
+
+<hr>
+</pre>
+The only subtle pieces of code are <b>dll_insert_b()</b> and 
+<b>dll_delete_node</b>.  With <b>dll_insert_b(n, v)</b> we
+<b>malloc()</b> a new node, set its value to <b>v</b>, and then
+link it into the list right before <b>n</b>.  This means that
+we set the new node's <b>flink</b> field to <b>n</b>, and its
+<b>blink</b> field to <b>n->blink</b>.  Then we set <b>n->blink</b>
+to the new node, and the old <b>n->blink</b>'s <b>flink</b> field
+to  the new node.  Here's the code:
+<pre>
+dll_insert_b(Dllist node, Jval v)       /* Inserts before a given node */
+{
+  Dllist new;
+
+  new = (Dllist) malloc (sizeof(struct dllist));
+  new->val = v;
+
+  new->flink = node;
+  new->blink = node->blink;
+  new->flink->blink = new;
+  new->blink->flink = new;
+}
+</pre>
+
+Once we have <b>dll_insert_b()</b> the other three list insertion 
+routines are simply calls to <b>dll_insert_b()</b>:
+<pre>
+dll_insert_a(Dllist n, Jval val)        /* Inserts after a given node */
+{
+  dll_insert_b(n->flink, val);
+} 
+
+dll_append(Dllist l, Jval val)     /* Inserts at the end of the list */
+{ 
+  dll_insert_b(l, val);
+}
+
+dll_prepend(Dllist l, Jval val)    /* Inserts at the beginning of the list */
+{ 
+  dll_insert_b(l->flink, val);
+} 
+</pre>
+
+Deletion is pretty easy too.  First you must remove the node <b>n</b>'s
+from the list by setting <b>n->flink->blink</b> to <b>n->blink</b>
+and by setting <b>n->blink->flink</b> to <b>n->flink</b>.  Then
+you free <b>n</b>:
+<pre>
+dll_delete_node(Dllist node)            /* Deletes an arbitrary iterm */
+{
+  node->flink->blink = node->blink;
+  node->blink->flink = node->flink;
+  free(node);
+}
+</pre>
+

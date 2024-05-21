@@ -1,0 +1,1019 @@
+<title>CS360 Lecture notes -- Red-Black Trees (JRB)</title>
+<body bgcolor=ffffff>
+<h1><a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs360>CS360</a>
+Lecture notes -- Red-Black Trees (JRB)</h1>
+<LI><a href=http://web.eecs.utk.edu/~jplank>James S. Plank</a>
+<LI>Directory on UT EECS Machines: <b>~jplank/plank/classes/cs360/360/www-home/notes/JRB</b>
+<LI>Lecture notes:
+    <a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs360/360/notes/JRB>
+    <b>http://web.eecs.utk.edu/~jplank/plank/classes/cs360/360/notes/JRB</b></a>
+<LI> Original notes written August, 1999.
+<LI> Latest revision: Fri Jan 29 18:16:25 EST 2021
+
+<h2>Red-Black Trees</h2>
+
+Rb-trees are data structures based on balanced binary trees.  You don't need
+to know how they work -- just that they do work, and all operations are in
+<i>O(log(n))</i> time, where <i>n</i> is the number of elements in the tree.
+(If you really
+want to know more about red-black trees, let me know and I can point you to
+some texts on them).
+<p>
+The main struct for rb-trees is the <b>JRB</b>.  Like dllists, all
+rb-trees have a header node.  You create a rb-tree by calling
+<b>make_jrb()</b>, which returns a pointer to the header node of an
+empty rb-tree.  This header points to the main body of the rb-tree,
+which you don't need to care about, and to the first and last
+external nodes of the tree.  These external nodes are hooked together
+with flink and blink pointers, so that you can view rb-trees as being
+dllists with the property that they are sorted, and you can find any 
+node in the tree in <i>O(log(n))</i> time.
+<p>
+Like dllists, each node in the tree has a <b>val</b> field, which is
+a <b>Jval</b>.  Additionally, each node has a <b>key</b> field, which is also
+a <b>Jval</b>.  The rb-tree tree makes sure that the keys are sorted.  How
+they are sorted depends on the tree.  
+
+<p>
+<hr>
+<h2>_str, _int, _dbl, _gen</h2>
+
+The jrb tree routines in <b>jrb.h/jrb.c</b> implement four
+types of insertion/searching routines.  The insertion routines are:
+<UL>
+<LI> <b>JRB jrb_insert_str(JRB tree, char *key, Jval val)</b>:
+     insert a new node into the tree using a standard character string as the
+     key.  <b>Strcmp()</b> is used as the comparison function.  See
+     <a href=src/strsort.c><b>src/strsort.c</b></a> for a simple example of
+     sorting standard input lexicographically with <b>jrb_insert_str()</b>.
+<p>
+     Note that it returns a pointer to the new jrb tree node.  Also
+     note that if the key is already in the tree, then it still creates
+     a new node and puts it into the tree.  No guarantees are made concerning
+     the relative ordering of duplicate keys.  In that way, jrb's are like
+     multimaps, rather than maps, in C++.
+<p>
+     Even though the key is a string, it will be converted into a <b>Jval</b>
+     in the new node.  Thus, if you want to get at the key of node
+     <b>s</b>, you should use <b>s->key.s</b>.
+<p>
+<LI> <b>JRB jrb_insert_int(JRB tree, int key, Jval val)</b>:
+     insert into the tree using an integer as the key.
+     See <a href=src/nsort.c><b>src/nsort.c</b></a> for an example of this.
+<p>
+<LI> <b>JRB jrb_insert_dbl(JRB tree, double key, Jval val)</b>:
+     insert into the tree using a <b>double</b> as the key.
+<p>
+<LI> <b>JRB jrb_insert_gen(JRB tree, Jval key, Jval val,
+        int (*func)(Jval, Jval))</b>:
+     Now, your key is a <b>jval</b>.  You provide a comparison function
+     <b>func()</b>, which takes two <b>Jval</b>'s as arguments, and returns:
+<p>
+<UL>
+<LI> a negative integer if the first key is less than the second.
+<LI> a positive integer if the first key is greater than the second.
+<LI> zero if the keys are equal.
+</UL>
+<p>
+     This lets you do more sophisticated things than simply sorting with
+     integers and strings.  See 
+     <a href=src/strrsort2.c><b>src/strrsort2.c</b></a> and 
+     <a href=src/nsort2.c><b>src/nsort2.c</b></a> below for examples.
+</UL>
+
+You can't mix and match comparison functions within the same tree.  In other
+words, you shouldn't insert some keys with <b>jrb_insert_str()</b> and
+some with <b>jrb_insert_int()</b>.  To do so will be begging for a core dump.
+<p>
+To find keys, you use one of <b>jrb_find_str()</b>, 
+<b>jrb_find_int()</b>, 
+<b>jrb_find_dbl()</b> or
+<b>jrb_find_gen()</b>.  Obviously, if you inserted keys with 
+<b>jrb_insert_str()</b>, then you should use <b>jrb_find_str()</b>
+to find them.  If the key that you're looking for is not in the tree, then
+<b>jrb_find_<i>xxx</i>()</b> returns NULL.
+<p>
+Finally, there are also:
+<b>jrb_find_gte_str()</b>, 
+<b>jrb_find_gte_int()</b>, 
+<b>jrb_find_gte_dbl()</b> and
+<b>jrb_find_gte_gen()</b>.  These return the jrb tree node whose key is
+either equal to the specified key, or whose key is the smallest one greater
+than the specified key.  If the specified key is greater than any in the tree,
+it will return a pointer to the sentinel node.  It has an argument <b>found</b>
+that is set to tell you if the key was found or not.
+
+<hr>
+You may use the macros <b>jrb_first()</b>, 
+<b>jrb_last()</b>, 
+<b>jrb_prev()</b> and
+<b>jrb_next()</b>, just like their counterparts in the dllist library.
+I tend not to use them, but some students like them.
+<p>
+To delete a node, use <b>jrb_delete_node()</b> (obviously, don't do that on the sentinel
+node).  
+To delete an entire tree, you use <b>jrb_free_tree()</b>.  Neither of these procedures
+calls <b>free()</b> on 
+keys and vals -- they simply deletes all memory associated with the nodes on the tree.
+<p>
+Finally, you may call <b>jrb_empty()</b> to determine if a tree is empty or not.
+
+<hr>
+<h3>Example programs:</h3>
+
+<UL>
+<LI> <a href=src/strsort.c><b>src/strsort.c</b></a>: Uses red-black trees to sort
+standard input lexicographically.
+<LI> <a href=src/strrsort1.c><b>src/strrsort1.c</b></a>: Uses red-black trees to sort
+standard input lexicographically in reverse order.  It does this by
+traversing the tree in reverse order.
+<LI> <a href=src/strrsort2.c><b>src/strrsort2.c</b></a>: Uses red-black trees to sort
+standard input lexicographically in reverse order.  It does this by
+creating a new comparison function <b>revcomp</b>, which simply returns
+<b>-strcmp()</b>.  Now the tree sorts in reverse order, so it is
+traversed in the forward direction.
+<LI> <a href=src/strusort.c><b>src/strusort.c</b></a>: Uses red-black trees to sort
+standard input lexicographically, and it removes duplicate lines.  It
+does this by checking for a line before inserting it into the tree.
+<LI> <a href=src/strisort.c><b>src/strisort.c</b></a>: Uses red-black trees to sort
+standard input lexicographically, ignoring upper and lower case.
+It does this by creating a separate key, which is the string in upper case.  It sorts
+with that string, and stores the original string in the <b>val</b>.
+<LI> <a href=src/nsort.c><b>src/nsort.c</b></a>: Uses red-black trees to sort
+like <b>sort -n</b> -- i.e. it treats each line as an integer, and
+sorts it that way.  If the lines are not integers, or there are duplicate
+lines, anything goes.
+<LI> <a href=src/nsort2.c><b>src/nsort2.c</b></a>: Uses red-black trees to sort
+like <b>sort -n</b> only now if two lines have the same <b>atoi()</b>
+value, then they are sorted lexicographically.  This uses
+<b>jrb_insert_gen()</b>.
+<LI> <a href=src/nsort3.c><b>src/nsort3.c</b></a>: Same as <b>nsort2</b>, but
+instead it uses a two-level red-black tree.  If this is confusing to you, please
+read the next example, which does a very similar thing.
+</UL>
+
+<hr>
+<h3>A two-level tree example</h3>
+
+Suppose we are reading input composed of names and scores.  Names can be any number
+of words, and scores are integers.  Each line contains a name followed by a score, and
+there can be any amount of whitespace between words in the input file.  An
+example is
+<b><a href=data/input-nn.txt>data/input-nn.txt</a></b>.  As you can see from the first 10 
+lines, it's kind of messy, but it conforms to the format:
+
+<pre>
+UNIX> <font color=darkred><b>head -n 10 data/input-nn.txt</b></font>
+     Molly Skyward                              60    
+Taylor   Becloud                             47
+   Brody   Hysteresis                    56
+Tristan   Covenant                           75
+Adam   Dyeing                         38
+Brianna   Domain                      54
+     Jonathan   Value                              5
+        Max Head                                   48
+Adam   Bobbie                         68
+        Jack Indescribable                  99
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Suppose we want to process this input file by creating a <b>Person</b> struct
+for each line that has the person's name and score:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+typedef struct {
+  char *name;
+  int score;
+} Person;
+</pre></td></table></center><p>
+
+And then suppose we want to print the people, sorted first by score, and then
+by name.  We want the format of our output to be the name, left justified and
+padded to 40 characters, followed by the score padded to two characters.
+I'm going to write this program three times.  I believe the last of the three
+is the best, but it's a good exercise to go over all three.
+
+<h3>ni_sort1.c -- creating a sorting key</h3>
+
+The first program is 
+<b><a href=src/ni_sort1.c>src/ni_sort1.c</a></b>.
+It reads each person into a struct and then
+creates a string that it uses as a comparison string.  That key contains the score,
+right justified and padded to ten characters, and then the name.  Thus, when you use
+the key to insert people into a red-black tree, the tree is sorted in the order that
+you want.  
+<p>
+Let's look at the program:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include "jrb.h"
+#include "fields.h"
+
+typedef struct {
+  char *name;
+  int score;
+  char *key;
+} Person;
+
+int main()
+{
+  JRB t, tmp;
+  IS is;
+  Person *p;
+  int nsize, i;
+
+  is = new_inputstruct(NULL);
+  t = make_jrb();
+
+  while (get_line(is) &gt;= 0) {
+    if (is-&gt;NF &gt; 1) {
+
+      <font color=blue>/* Each line is name followed by score.  The score is easy to get. */</font>
+
+      p = malloc(sizeof(Person));
+      p-&gt;score = atoi(is-&gt;fields[is-&gt;NF-1]);
+
+      <font color=blue>/* The name is a different matter, because names may be composed of any 
+         number of words with any amount of whitespace.  We want to create a 
+         name string that has each word of the name separated by one space. 
+  
+         Our first task is to calculate the ssize of our name. */</font>
+
+      nsize = strlen(is-&gt;fields[0]);
+      for (i = 1; i &lt; is-&gt;NF-1; i++) nsize += (strlen(is-&gt;fields[i])+1);
+
+      <font color=blue>/* We then allocate the string and copy the first word into the string. */</font>
+
+      p-&gt;name = (char *)</font> malloc(sizeof(char)*(nsize+1));
+      strcpy(p-&gt;name, is-&gt;fields[0]);
+
+      <font color=blue>/* We copy in the remaining words, but note how we do so by calling strcpy
+         into the exact location of where the name goes, rather than, say, repeatedly
+         calling strcat() as we would do in a C++-like solution.  This is much more 
+         efficient (not to mention inconvenient) than using strcat(). */</font>
+         
+      nsize = strlen(is-&gt;fields[0]);
+      for (i = 1; i &lt; is-&gt;NF-1; i++) {
+        p-&gt;name[nsize] = ' ';
+        strcpy(p-&gt;name+nsize+1, is-&gt;fields[i]);
+        nsize += strlen(p-&gt;name+nsize);
+      }
+
+      <font color=blue>/* We create a key for inserting into the red-black tree.  That is going
+         to be the score, padded to 10 characters, followed by the name.  We 
+         allocate (nsize+12) characters: nsize for the name, 10 for the score,
+         one for the space, and one for the null character. */</font>
+
+      p-&gt;key = (char *)</font> malloc(sizeof(char) * (nsize + 12));
+      sprintf(p-&gt;key, "%10d %s", p-&gt;score, p-&gt;name);
+ 
+      jrb_insert_str(t, p-&gt;key, new_jval_v((void *)</font> p));
+    }
+  }
+
+  <font color=blue>/* Traverse the tree and print the people. */</font>
+
+  jrb_traverse(tmp, t) {
+    p = (Person *)</font> tmp-&gt;val.v;
+    printf("%-40s %2d\n", p-&gt;name, p-&gt;score);
+  }
+  return 0;
+}
+</pre></td></table></center><p>
+
+
+You should pay attention
+to how I created the name, as it how you do such a thing efficiently in C.
+You'll be tempted to simply allocate a giant string and then use <b>strcat()</b> to 
+create the name.  That's the paradigm that you'd use in C++.  However, that's inefficient
+because of <b>strcat()</b> (see the commentary on <b>strcat()</b> in 
+<a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs360/360/notes/Strings-In-C/index.html>these lecture notes</a>).
+<p>
+Instead, you make one pass over the name to calculate the size of the string, and then
+you allocate the string.  You then use <b>strcpy()</b> to copy each word of the name into
+its proper place.  Yes, the code is ugly, but it is the most efficient way to do it.
+<p>
+After creating the name, we create the comparison key, and note how we have to calculate its
+size and allocate it.  We insert the key into the tree with the person struct as a val,
+and when we traverse it, we get the order that we want.  I used "%10d" for the score, because
+I know the maxiumum integer is 2<sup>31</sup>, which is roughly 2,000,000,000.  I want the scores
+all aligned and right justified in the keys, because that way it will sort the integers properly.
+This is because space has a lower ASCII value than numbers.
+<p>
+It's always good to sanity-check your programs to make sure that the output makes sense, and
+that you have no bugs or typos.  I do that below.  First, I make sure that the
+input and output files have the same number of lines and words:
+
+<pre>
+UNIX> <font color=darkred><b>bin/ni_sort1 < data/input-nn.txt > data/output-1.txt</b></font>
+UNIX> <font color=darkred><b>wc data/input-nn.txt data/output-1.txt</b></font>
+  500  1583 24446 data/input-nn.txt
+  500  1583 22000 data/output-1.txt
+ 1000  3166 46446 total
+UNIX>
+</pre>
+
+They differ in the number of characters, because they format the words and scores differently.
+All is good so far.  Next, I sanity-check the beginning and the ending to make sure that they
+look right:
+
+<pre>
+UNIX> <font color=darkred><b>head data/output-1.txt</b></font>
+Addison Paige Chain                       0
+Eli Gneiss                                0
+Ella Craftsperson                         0
+Lilly Gianna Zen                          0
+Matthew Stiffen                           0
+Evan Boorish                              1
+Isaiah Metabolism                         1
+Mason Fourier                             1
+Xavier Agave                              1
+Daniel Berman                             2
+UNIX> <font color=darkred><b>tail data/output-1.txt</b></font>
+Layla Option                             96
+Lucas Fay Jr                             96
+Madeline Task                            96
+Sofia Nitrous                            96
+Gianna Sinh                              97
+Lucy Quaternary                          97
+Sophia Contrariety                       97
+Charlie Lucas Vine                       98
+Jack Indescribable                       99
+Lily Span                                99
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Then I do a sampling, to make sure that one of the score values has the right output.  Here,
+I do that with 96:
+
+<pre>
+UNIX> <font color=darkred><b>grep 96 data/output-1.txt</b></font>
+Alexander Bstj                           96
+Grace Globulin                           96
+Jonathan Blanket Esq                     96
+Kaitlyn Thwack                           96
+Layla Option                             96
+Lucas Fay Jr                             96
+Madeline Task                            96
+Sofia Nitrous                            96
+UNIX> <font color=darkred><b>grep 96 data/input-nn.txt </b></font>
+   Grace Globulin                      96
+        Jonathan   Blanket Esq                96
+Alexander   Bstj                      96
+     Madeline Task                              96
+     Layla Option                               96
+     Kaitlyn Thwack                             96
+     Sofia Nitrous                              96    
+        Lucas Fay Jr                        96
+UNIX> <font color=darkred><b>grep 96 data/input-nn.txt | sed 's/^ *//' | sort</b></font>
+Alexander   Bstj                      96
+Grace Globulin                      96
+Jonathan   Blanket Esq                96
+Kaitlyn Thwack                             96
+Layla Option                               96
+Lucas Fay Jr                        96
+Madeline Task                              96
+Sofia Nitrous                              96    
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Ok, I'm good.  Note, that's not a conclusive test.  Here's a more conclusive test 
+(only look at this if you're really interested.  I do this stuff all the time, so I'm good
+at it.  However, I will urge you to learn <b>sed</b> and <b>awk</b>, because they are 
+super-powerful)
+(Oh, and I'm not testing you on this stuff.  I'm just trying to help you become more
+effective with Unix tools):
+
+<pre>
+UNIX> <font color=darkred><b>sed 's/^ *//' data/input-nn.txt | head</b></font>              <font color=blue># Remove the initial spaces</font>
+Molly Skyward                              60    
+Taylor   Becloud                             47
+Brody   Hysteresis                    56
+Tristan   Covenant                           75
+Adam   Dyeing                         38
+Brianna   Domain                      54
+Jonathan   Value                              5
+Max Head                                   48
+Adam   Bobbie                         68
+Jack Indescribable                  99
+UNIX> <font color=darkred><b>sed 's/^ *//' data/input-nn.txt | sed 's/  */-/g' | head</b></font>              <font color=blue># Change each block of spaces to a single dash.</font>
+Molly-Skyward-60-
+Taylor-Becloud-47
+Brody-Hysteresis-56
+Tristan-Covenant-75
+Adam-Dyeing-38
+Brianna-Domain-54
+Jonathan-Value-5
+Max-Head-48
+Adam-Bobbie-68
+Jack-Indescribable-99
+UNIX> <font color=darkred><b>sed 's/^ *//' data/input-nn.txt | \
+      sed 's/  */-/g' | sed 's/-\([0-9]\)/ \1/' | head</b></font>     <font color=blue># Change the dash in front of the numbers to a single space.</font>
+Molly-Skyward 60-
+Taylor-Becloud 47
+Brody-Hysteresis 56
+Tristan-Covenant 75
+Adam-Dyeing 38
+Brianna-Domain 54
+Jonathan-Value 5
+Max-Head 48
+Adam-Bobbie 68
+Jack-Indescribable 99
+UNIX> <font color=darkred><b>sed 's/^ *//' data/input-nn.txt | \
+      sed 's/  */-/g' | sed 's/-\([0-9]\)/ \1/' | sed 's/-$//' | head</b></font>     <font color=blue># Get rid of the dash at the end of a line.</font>
+Molly-Skyward 60
+Taylor-Becloud 47
+Brody-Hysteresis 56
+Tristan-Covenant 75
+Adam-Dyeing 38
+Brianna-Domain 54
+Jonathan-Value 5
+Max-Head 48
+Adam-Bobbie 68
+Jack-Indescribable 99
+UNIX> <font color=darkred><b>sed 's/^ *//' data/input-nn.txt | \
+      sed 's/  */-/g' | sed 's/-\([0-9]\)/ \1/' | \
+      sed 's/-$//' | awk '{ print $2, $1 }' | head</b></font>                       <font color=blue># Print the number before the name.</font>
+60 Molly-Skyward
+47 Taylor-Becloud
+56 Brody-Hysteresis
+75 Tristan-Covenant
+38 Adam-Dyeing
+54 Brianna-Domain
+5 Jonathan-Value
+48 Max-Head
+68 Adam-Bobbie
+99 Jack-Indescribable
+UNIX> <font color=darkred><b>sed 's/^ *//' data/input-nn.txt | \
+      sed 's/  */-/g' | sed 's/-\([0-9]\)/ \1/' | \
+      sed 's/-$//' | awk '{ print $2, $1 }' | sort -n | head</b></font>            <font color=blue># Sort by number</font>
+0 Addison-Paige-Chain
+0 Eli-Gneiss
+0 Ella-Craftsperson
+0 Lilly-Gianna-Zen
+0 Matthew-Stiffen
+1 Evan-Boorish
+1 Isaiah-Metabolism
+1 Mason-Fourier
+1 Xavier-Agave
+2 Daniel-Berman
+UNIX> <font color=darkred><b>sed 's/^ *//' data/input-nn.txt | \
+      sed 's/  */-/g' | sed 's/-\([0-9]\)/ \1/' | \
+      sed 's/-$//' | awk '{ print $2, $1 }' | \
+      sort -n | awk '{ printf "%-40s %2d\n", $2, $1 }' | head</b></font>            <font color=blue># Pad the name to 40 characters and the number to two</font>
+Addison-Paige-Chain                       0
+Eli-Gneiss                                0
+Ella-Craftsperson                         0
+Lilly-Gianna-Zen                          0
+Matthew-Stiffen                           0
+Evan-Boorish                              1
+Isaiah-Metabolism                         1
+Mason-Fourier                             1
+Xavier-Agave                              1
+Daniel-Berman                             2
+UNIX> <font color=darkred><b>sed 's/^ *//' data/input-nn.txt | \
+      sed 's/  */-/g' | sed 's/-\([0-9]\)/ \1/' | \
+      sed 's/-$//' | awk '{ print $2, $1 }' | \
+      sort -n | awk '{ printf "%-40s %2d\n", $2, $1 }' | \
+      sed 's/-/ /g' | head</b></font>                                          <font color=blue># Change the dashes back to spaces</font>
+Addison Paige Chain                       0
+Eli Gneiss                                0
+Ella Craftsperson                         0
+Lilly Gianna Zen                          0
+Matthew Stiffen                           0
+Evan Boorish                              1
+Isaiah Metabolism                         1
+Mason Fourier                             1
+Xavier Agave                              1
+Daniel Berman                             2
+UNIX> <font color=darkred><b>sed 's/^ *//' data/input-nn.txt | \
+      sed 's/  */-/g' | sed 's/-\([0-9]\)/ \1/' | \
+      sed 's/-$//' | awk '{ print $2, $1 }' | \
+      sort -n | awk '{ printf "%-40s %2d\n", $2, $1 }' | \
+      sed 's/-/ /g' > junk.txt</b></font>                                <font color=blue># Put the output into junk.txt</font>
+UNIX> <font color=darkred><b>openssl md5 junk.txt output-1.txt</b></font>                       <font color=blue># Check the md5 hash of junk.txt and make sure it matches output-1.txt</font>
+MD5(junk.txt)= 4eee1503231b23c0052d9b3c57b1cd50
+MD5(output-1.txt)= 4eee1503231b23c0052d9b3c57b1cd50
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Now, let's write the program a second time, only this time we simply insert the <b>Person</b>
+struct as a key, and write a comparison function to compare keys.  The program 
+is in 
+<b><a href=src/ni_sort2.c>src/ni_sort2.c</a></b>, and here are the relevant parts:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+typedef struct {
+  char *name;
+  int score;
+} Person;
+
+int compare(Jval j1, Jval j2)
+{
+  Person *p1, *p2;
+
+  p1 = (Person *) j1.v;
+  p2 = (Person *) j2.v;
+
+  if (p1-&gt;score &gt; p2-&gt;score) return 1;
+  if (p1-&gt;score &lt; p2-&gt;score) return -1;
+  return strcmp(p1-&gt;name, p2-&gt;name);
+}
+
+int main()
+{
+  JRB t, tmp;
+  IS is;
+  Person *p;
+  int nsize, i;
+
+  is = new_inputstruct(NULL);
+  t = make_jrb();
+
+  while (get_line(is) &gt;= 0) {
+
+      ....  do the reading and the creation of the person
+
+      <font color=blue>/* We now insert using jrb_insert_gen, with the person struct as a key. */</font>
+
+      jrb_insert_gen(t, new_jval_v((void *) p), new_jval_v(NULL), compare);
+    }
+  }
+
+  jrb_traverse(tmp, t) {
+    p = (Person *) tmp-&gt;key.v;
+    printf("%-40s %2d\n", p-&gt;name, p-&gt;score);
+  }
+  return 0;
+}
+</pre></td></table></center><p>
+
+This doesn't require much comment, except to remember that the keys are jvals, so you
+must typecast them to the type that you want in the comparison function.
+It's easy to affirm that the output of this program is the same as the last:
+
+<pre>
+UNIX> <font color=darkred><b>bin/ni_sort2 < data/input-nn.txt | head</b></font>
+Addison Paige Chain                       0
+Eli Gneiss                                0
+Ella Craftsperson                         0
+Lilly Gianna Zen                          0
+Matthew Stiffen                           0
+Evan Boorish                              1
+Isaiah Metabolism                         1
+Mason Fourier                             1
+Xavier Agave                              1
+Daniel Berman                             2
+UNIX> <font color=darkred><b>bin/ni_sort2 < data/input-nn.txt > output-2.txt</b></font>
+UNIX> <font color=darkred><b>openssl md5 output-*.txt</b></font>
+MD5(output-1.txt)= 4eee1503231b23c0052d9b3c57b1cd50
+MD5(output-2.txt)= 4eee1503231b23c0052d9b3c57b1cd50
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+The final program is
+<b><a href=src/ni_sort3.c>src/ni_sort3.c</a></b>, and it uses a two-level tree.  The first level is
+keyed on scores, and there is only one tree node per score.  The val of each node is a
+red-black tree keyed on name, with the person struct in the val.  Take a look at how we
+create the tree and print it out.  I personally like this solution the best, and it's good
+practice for you, because you will be creating data structures like these all the time:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+int main()
+{
+  JRB t, tmp, person_tree, t2;
+  IS is;
+  Person *p;
+  int nsize, i;
+
+  is = new_inputstruct(NULL);
+  t = make_jrb();
+
+  while (get_line(is) &gt;= 0) {
+
+    if (is-&gt;NF &gt; 1) {
+      ... Read and create the person
+
+      <font color=blue>/* To insert the person, we first test to see if the score is in the
+         tree.  If it is not, we create it with an empty red-black tree as a val. 
+         In either case, we insert the name into the second-level tree. */</font>
+
+      tmp = jrb_find_int(t, p-&gt;score);
+      if (tmp == NULL) {
+        person_tree = make_jrb();
+        jrb_insert_int(t, p-&gt;score, new_jval_v((void *) person_tree));
+      } else {
+        person_tree = (JRB) tmp-&gt;val.v;
+      }
+
+      jrb_insert_str(person_tree, p-&gt;name, new_jval_v((void *) p));
+    }
+  }
+
+  <font color=blue>/* To print the people, we need to do a nested, two-level recursion */</font>
+
+  jrb_traverse(tmp, t) {
+    person_tree = (JRB) tmp-&gt;val.v;
+    jrb_traverse(t2, person_tree) {
+      p = (Person *) t2-&gt;val.v;
+      printf("%-40s %2d\n", p-&gt;name, p-&gt;score);
+    }
+  }
+  return 0;
+}
+</pre></td></table></center><p>
+
+Again, we can double-check to make sure it's correct:
+
+<pre>
+UNIX> <font color=darkred><b>bin/ni_sort3 < data/input-nn.txt | head</b></font>
+Addison Paige Chain                       0
+Eli Gneiss                                0
+Ella Craftsperson                         0
+Lilly Gianna Zen                          0
+Matthew Stiffen                           0
+Evan Boorish                              1
+Isaiah Metabolism                         1
+Mason Fourier                             1
+Xavier Agave                              1
+Daniel Berman                             2
+UNIX> <font color=darkred><b>bin/ni_sort3 < data/input-nn.txt > output-3.txt</b></font>
+UNIX> <font color=darkred><b>openssl md5 output-*.txt</b></font>
+MD5(output-1.txt)= 4eee1503231b23c0052d9b3c57b1cd50
+MD5(output-2.txt)= 4eee1503231b23c0052d9b3c57b1cd50
+MD5(output-3.txt)= 4eee1503231b23c0052d9b3c57b1cd50
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+<hr>
+<h3>Another Example: ``Golf''</h3>
+
+Here's another typical example of using a red-black tree.  
+It doesn't do much beyond the last example, but I include it for practice.
+Suppose we have
+a bunch of files with golf scores.  Examples are in
+<a href=data/1998_Majors><b>data/1998_Majors</b></a> and 
+<a href=data/1999_Majors><b>data/1999_Majors</b></a>.  The format of these
+files is:
+<pre>
+<b>Name     some-random-word</b> F <b>total-score</b>
+</pre>
+For example, the first few lines of 
+<a href=data/1999_Majors/Masters><b>data/1999_Majors/Masters</b></a> are:
+<pre>
+Jose Maria Olazabal                 -1 F -8
+Davis Love III                      -1 F -6
+Greg Norman                         +1 F -5
+Bob Estes                           +0 F -4
+Steve Pate                          +1 F -4
+David Duval                         -2 F -3
+Phil Mickelson                      -1 F -3
+...
+</pre>
+Note that the name can have any number of words.
+<p>
+Now, suppose that we want to do some data processing on these files.
+For example, suppose we'd like to sort each player so that we first
+print out the players that have played the most tournaments, and then 
+within that, we sort by the player with the lowest average score.
+<p>
+This is what
+<a href=src/golf.c><b>src/golf.c</b></a> does.  It takes score files on the command
+line, then reads in all the players and scores.  Then it sorts them 
+by number of tournaments/average score, and prints them out in that order,
+along with their score for each tournament.  For example, look at
+<a href=data/score1.txt><b>data/score1.txt</b></a>:
+<pre>
+Jose Maria Olazabal                 -1 F -8
+Davis Love III                      -1 F -6
+Greg Norman                         +1 F -5
+</pre>
+and <a href=data/score2.txt><b>data/score2.txt</b></a>:
+<pre>
+Greg Norman                          +1  F +9
+David Frost                          +3  F +10
+Davis Love III                       -2  F +11
+</pre>
+The <b>golf</b> program reads in these two files, and ranks the four players
+by number of tournaments, and then average score:
+<pre>
+UNIX> <font color=darkred><b>bin/golf score1.txt score2.txt</b></font>
+Greg Norman                              :   2 tournaments :    2.00
+   -5 : score1.txt
+    9 : score2.txt
+Davis Love III                           :   2 tournaments :    2.50
+   -6 : score1.txt
+   11 : score2.txt
+Jose Maria Olazabal                      :   1 tournament  :   -8.00
+   -8 : score1.txt
+David Frost                              :   1 tournament  :   10.00
+   10 : score2.txt
+</pre>
+<p>
+Ok, now how does <b>golf</b> work?  Well it works in three phases.  In
+the first phase, it reads the input files to create a struct for each 
+golfer.  Here's the <b>typedef:</b>
+<pre>
+typedef struct {
+  char *name;
+  int ntourn;
+  int tscore;
+  Dllist scores;
+} Golfer;
+</pre>
+The first three fields are obvious.  The last field is a list of the 
+golfer's scores.  Each element of the list points to a <b>Score</b>
+struct with the following definition:
+<pre>
+typedef struct {
+  char *tname;             /* File name */
+  int score;               /* Total score */
+} Score;
+</pre>
+<p>
+So, to read in the golfers, we create a jrb tree <b>golfers</b>, which will
+have names as keys, and <b>Golfer</b> structs as vals.  We then
+read in each line of each input file.  For each line, we construct
+the golfer's name, and then we look to see if the golfer has an entry 
+in the <b>golfers</b> tree.  If there is no such entry, then one is
+created.  Once the entry is found/created, the score for that file
+is added.  When all the files have been read, phase 1 is completed:
+<pre>
+  Golfer *g;
+  Score *s;
+  JRB golfers, rnode;
+  int i, fn;
+  int tmp;
+  IS is;
+  char name[1000];
+  Dllist dnode;
+
+  golfers = make_jrb();
+
+  for (fn = 1; fn < argc; fn++) {
+    is = new_inputstruct(argv[fn]);
+    if (is == NULL) { perror(argv[fn]); exit(1); }
+
+    while(get_line(is) >= 0) {
+
+      <font color=blue>/* Error check each line */</font>
+
+      if (is->NF < 4 || strcmp(is->fields[is->NF-2], "F") != 0 ||
+          sscanf(is->fields[is->NF-1], "%d", &tmp) != 1) {
+        fprintf(stderr, "File %s, Line %d: Not the proper format\n",
+          is->name, is->line);
+        exit(1);
+      }
+      
+      <font color=blue>/* Construct the golfer's name. This is lazy code that is inefficient, by the way */</font>
+
+      strcpy(name, is->fields[0]);
+      for (i = 1; i < is->NF-3; i++) {
+        strcat(name, " ");
+        strcat(name, is->fields[i]);
+      }
+      
+      <font color=blue>/* Search for the name */</font>
+
+      rnode = jrb_find_str(golfers, name);
+
+      <font color=blue>/* Create an entry if none exists. */</font>
+
+      if (rnode == NULL) {
+        g = (Golfer *) malloc(sizeof(Golfer));
+        g->name = strdup(name);
+        g->ntourn = 0;
+        g->tscore = 0;
+        g->scores = new_dllist();
+        jrb_insert_str(golfers, g->name, new_jval_v(g));
+      } else {
+        g = (Golfer *) rnode->val.v;
+      }
+
+      <font color=blue>/* Add the information to the golfer's struct */</font>
+
+      s = (Score *) malloc(sizeof(Score));
+      s->tname = argv[fn];
+      s->score = atoi(is->fields[is->NF-1]);
+      g->ntourn++;
+      g->tscore += s->score;
+      dll_append(g->scores, new_jval_v(s));
+    }
+
+    <font color=blue>/* Go on to the next file */</font>
+
+    jettison_inputstruct(is);
+  }
+
+</pre>
+Now, this gives us all the information on the golfers, but they are
+sorted by the golfers' names, not by number of tournaments / average
+score.  Thus, in phase 2, we construct a second red-black tree which
+will sort the golfers correctly.  To do this, we need to construct
+our own comparison function that compares golfers by number of 
+tournaments / average score.  Here is the comparison function:
+<pre>
+int golfercomp(Jval j1, Jval j2)
+{
+  Golfer *g1, *g2;
+
+  g1 = (Golfer *) j1.v;
+  g2 = (Golfer *) j2.v;
+
+  if (g1->ntourn > g2->ntourn) return 1;
+  if (g1->ntourn < g2->ntourn) return -1;
+  if (g1->tscore < g2->tscore) return 1;
+  if (g1->tscore > g2->tscore) return -1;
+  return 0;
+}
+</pre>
+And here is the part of <b>main</b> where the second red-black
+tree is built:
+<pre>
+
+  sorted_golfers = make_jrb();
+
+  jrb_traverse(rnode, golfers) {
+    jrb_insert_gen(sorted_golfers, rnode->val, JNULL, golfercomp);
+  }
+
+</pre>
+Note, you pass a <b>Jval</b> to <b>jrb_insert_gen</b>.
+<p>
+Finally, the third phase is to traverse the 
+<b>sorted_golfers</b> tree, printing out the correct 
+information for each golfer.  This is straightforward, and
+done below:
+<pre>
+  jrb_rtraverse(rnode, sorted_golfers) {
+    g = (Golfer *) rnode->key.v;
+    printf("%-40s : %3d tournament%1s : %7.2f\n", g->name, g->ntourn,
+           (g->ntourn == 1) ? "" : "s", 
+           (float) g->tscore / (float) g->ntourn);
+    dll_traverse(dnode, g->scores) {
+      s = (Score *) dnode->val.v;
+      printf("  %3d : %s\n", s->score, s->tname);
+    }
+  }
+</pre>
+
+Try it out.  Back when I first wrote this lecture in 1998, Mark O'Meara had the year
+of his life, beating out Tiger Woods for the best performance in the majors:
+
+<pre>
+UNIX> <font color=darkred><b>bin/golf data/1998_Majors/* | head -n 10</b></font>
+Mark O'Meara                             :   4 tournaments :   -1.00
+    0 : data/1998_Majors/British_Open
+   -9 : data/1998_Majors/Masters
+   -4 : data/1998_Majors/PGA_Champ
+    9 : data/1998_Majors/US_Open
+Tiger Woods                              :   4 tournaments :    0.75
+    1 : data/1998_Majors/British_Open
+   -3 : data/1998_Majors/Masters
+   -1 : data/1998_Majors/PGA_Champ
+    6 : data/1998_Majors/US_Open
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+In 1999, Woods retook that crown in pretty dominant fashion:
+
+<pre>
+UNIX> <font color=darkred><b>bin/golf data/1999_Majors/* | grep '^[A-Z]' | head -n 5</b></font>
+Tiger Woods                              :   4 tournaments :    0.25
+Colin Montgomerie                        :   4 tournaments :    3.75
+Davis Love III                           :   4 tournaments :    4.50
+Jim Furyk                                :   4 tournaments :    4.50
+Nick Price                               :   4 tournaments :    4.75
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+Just to prove that I have nothing better to do, here are the top three
+in every year since 1998.  
+
+<pre>
+UNIX> <font color=darkred><b>sh -c 'for i in data/*Majors ; do echo $i ; bin/golf $i/* | grep "^[A-Z]" | head -n 3 ; echo "" ; done'</b></font>
+data/1998_Majors
+Mark O'Meara                             :   4 tournaments :   -1.00
+Tiger Woods                              :   4 tournaments :    0.75
+John Huston                              :   4 tournaments :    4.25
+
+data/1999_Majors
+Tiger Woods                              :   4 tournaments :    0.25
+Colin Montgomerie                        :   4 tournaments :    3.75
+Davis Love III                           :   4 tournaments :    4.50
+
+data/2000_Majors
+Tiger Woods                              :   4 tournaments :  -11.25
+Ernie Els                                :   4 tournaments :   -2.50
+Phil Mickelson                           :   4 tournaments :   -0.25
+
+data/2001_Majors
+David Duval                              :   4 tournaments :   -6.25
+Phil Mickelson                           :   4 tournaments :   -6.00
+Tiger Woods                              :   4 tournaments :   -3.75
+
+data/2002_Majors
+Tiger Woods                              :   4 tournaments :   -6.00
+Sergio Garcia                            :   4 tournaments :   -1.00
+Padraig Harrington                       :   4 tournaments :   -0.75
+
+data/2003_Majors
+Mike Weir                                :   4 tournaments :    1.00
+Ernie Els                                :   4 tournaments :    1.75
+Vijay Singh                              :   4 tournaments :    3.25
+
+data/2004_Majors
+Ernie Els                                :   4 tournaments :   -4.50
+K.J. Choi                                :   4 tournaments :    0.75
+Vijay Singh                              :   4 tournaments :    1.00
+
+data/2005_Majors
+Tiger Woods                              :   4 tournaments :   -6.50
+Retief Goosen                            :   4 tournaments :   -1.25
+Vijay Singh                              :   4 tournaments :   -1.25
+
+data/2006_Majors
+Phil Mickelson                           :   4 tournaments :   -3.00
+Geoff Ogilvy                             :   4 tournaments :   -2.25
+Jim Furyk                                :   4 tournaments :   -1.50
+
+data/2007_Majors
+Tiger Woods                              :   4 tournaments :   -0.25
+Justin Rose                              :   4 tournaments :    3.75
+Paul Casey                               :   4 tournaments :    6.75
+
+data/2008_Majors
+Padraig Harrington                       :   4 tournaments :    1.75
+Robert Karlsson                          :   4 tournaments :    5.25
+Phil Mickelson                           :   4 tournaments :    5.50
+
+data/2009_Majors
+Ross Fisher                              :   4 tournaments :    0.50
+Henrik Stenson                           :   4 tournaments :    0.75
+Lee Westwood                             :   4 tournaments :    1.00
+
+data/2010_Majors
+Phil Mickelson                           :   4 tournaments :   -4.50
+Tiger Woods                              :   4 tournaments :   -3.25
+Matt Kuchar                              :   4 tournaments :   -1.25
+
+data/2011_Majors
+Charl Schwartzel                         :   4 tournaments :   -3.50
+Sergio Garcia                            :   4 tournaments :   -1.00
+Steve Stricker                           :   4 tournaments :   -1.00
+
+data/2012_Majors
+Adam Scott                               :   4 tournaments :   -1.50
+Graeme McDowell                          :   4 tournaments :   -1.00
+Ian Poulter                              :   4 tournaments :    0.50
+
+data/2013_Majors
+Adam Scott                               :   4 tournaments :    0.50
+Jason Day                                :   4 tournaments :    0.50
+Henrik Stenson                           :   4 tournaments :    1.00
+
+data/2014_Majors
+Rickie Fowler                            :   4 tournaments :   -8.00
+Rory McIlroy                             :   4 tournaments :   -6.75
+Jim Furyk                                :   4 tournaments :   -5.25
+
+data/2015_Majors
+Jordan Spieth                            :   4 tournaments :  -13.50
+Jason Day                                :   4 tournaments :   -8.75
+Justin Rose                              :   4 tournaments :   -8.50
+
+data/2016_Majors
+Jason Day                                :   4 tournaments :   -2.25
+Jordan Spieth                            :   4 tournaments :    0.75
+Emiliano Grillo                          :   4 tournaments :    2.50
+
+data/2017_Majors
+Brooks Koepka                            :   4 tournaments :   -5.25
+Hideki Matsuyama                         :   4 tournaments :   -5.00
+Matt Kuchar                              :   4 tournaments :   -5.00
+
+data/2018_Majors
+Justin Rose                              :   4 tournaments :   -3.00
+Rickie Fowler                            :   4 tournaments :   -3.00
+Tommy Fleetwood                          :   4 tournaments :   -2.25
+
+data/2019_Majors
+Brooks Koepka                            :   4 tournaments :   -9.00
+Dustin Johnson                           :   4 tournaments :   -3.50
+Xander Schauffele                        :   4 tournaments :   -3.50
+
+data/2020_Majors
+Dustin Johnson                           :   3 tournaments :   -8.67
+Bryson DeChambeau                        :   3 tournaments :   -6.00
+Xander Schauffele                        :   3 tournaments :   -3.67
+
+data/2021_Majors
+Jon Rahm                                 :   4 tournaments :   -5.00
+Collin Morikawa                          :   4 tournaments :   -3.75
+Louis Oosthuizen                         :   4 tournaments :   -3.75
+
+UNIX>
+</pre>

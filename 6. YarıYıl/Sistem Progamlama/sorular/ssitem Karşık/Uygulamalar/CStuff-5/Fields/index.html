@@ -1,0 +1,551 @@
+<title>CS360 Lecture notes -- Fields</title>
+<body bgcolor=ffffff>
+<h1>
+<a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs360>CS360</a>
+Lecture Notes -- Fields</a></h1>
+<UL>
+<LI><a href=http://web.eecs.utk.edu/~jplank>James S. Plank</a>
+<LI>Directory: <b>~jplank/cs360/notes/Fields</b>
+<LI>Lecture notes:
+    <a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs360/360/notes/Fields>
+    <b>http://web.eecs.utk.edu/~jplank/plank/classes/cs360/360/notes/Fields</b></a>
+<LI> Original notes: Wed Aug 25 11:01:12 EDT 1999
+<LI> Last Revision: 
+Fri Jan 29 12:05:02 EST 2021
+</UL>
+<hr>
+
+The fields library is a suite of routines that make reading input
+easier than using <b>getchar()</b>, <b>scanf()</b> or <b>fgets()</b>.
+This is a library that I wrote -- it is not standard in Unix, but it
+should work with any C compiler (this includes on DOS/Windows).
+If you want to take the fields library with you after class, go 
+ahead and do so.  The source code is in this repo, in the directory "Libfdr".
+<p>
+In order to use the fields procedures in this class, 
+you should include the file
+<b>fields.h</b>. 
+On the EECS machines, this 
+can be found in the directory 
+<b>/home/jplank/cs360/include</b>.  
+Instead of including the full
+path name in your C file, just do: 
+<pre>
+#include "fields.h"
+</pre>
+and then compile the program with:
+<pre>
+gcc -I/home/jplank/cs360/include
+</pre>
+When you link your object files to make an executable, you need to
+follow the directions in the <a href=../Libfdr>Libfdr</a> notes.
+
+<p>
+The 
+<a href=makefile><b>makefile</b></a> 
+in this directory assumes that <b>Libfdr</b> is in the directory <b>../Libfdr</b>.
+If you pulled the lecture note repo, everything should be set up, although you may
+have to do:
+<pre>
+( cd ../Libfdr ; make )
+</pre>
+so that <b>../Libfdr/libfdr.a</b> is compiled and ready.
+
+<hr>
+
+The fields library defines and implements a data structure that simplifies
+input processing in C.  The data structure consists of a type definition
+and four procedure calls.  All are defined in <b>fields.h</b>: 
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* The fields library -- making input processing easier */</font>
+
+#include &lt;stdio.h&gt;
+#define MAXLEN 1001
+#define MAXFIELDS 1000
+
+typedef struct inputstruct {
+  const char *name;         <font color=blue>/* File name */</font>
+  FILE *f;                  <font color=blue>/* File descriptor */</font>
+  int line;                 <font color=blue>/* Line number */</font>
+  char text1[MAXLEN];       <font color=blue>/* The line */</font>
+  char text2[MAXLEN];       <font color=blue>/* Working -- contains fields */</font>
+  int NF;                   <font color=blue>/* Number of fields */</font>
+  char *fields[MAXFIELDS];  <font color=blue>/* Pointers to fields */</font>
+  int file;                 <font color=blue>/* 1 for file, 0 for popen */</font>
+} *IS;
+
+extern IS new_inputstruct(const char *filename);       <font color=blue>/* Use NULL for stdin. Returns NULL on failure. */</font>
+extern IS pipe_inputstruct(const char *shell_command); <font color=blue>/* Returns NULL on failure. */</font>
+extern int get_line(IS inputstruct);                   <font color=blue>/* returns NF, or -1 on EOF. */</font>
+extern void jettison_inputstruct(IS inputstruct);      <font color=blue>/* frees the IS and fcloses/pcloses the file */</font>
+#endif
+</pre></td></table></center><p>
+
+To read a file with the fields library,
+you call <b>new_inputstruct()</b>.  
+<b>New_inputstruct()</b>
+takes the file name as its argument (<b>NULL</b> for standard input), and
+returns an <b>IS</b> as a result.  Note that the <b>IS</b> is a pointer
+to a <b>struct inputstruct</b>.  This is <b>malloc()</b>'d for you 
+in the <b>new_inputstruct()</b> call.  If 
+<b>new_inputstruct()</b> 
+cannot open the file, it will return <b>NULL</b>, and you can call
+<b>perror()</b> to print out the reason for the failure (read the man
+page on <b>perror()</b> if you want to learn about it).
+<p>
+
+Once you have an <b>IS</b>, you call <b>get_line()</b> on it to read a line.
+<b>Get_line()</b> changes the state of the <b>IS</b> to reflect the 
+reading of the line.  Specifically:
+<UL>
+<LI> It puts the contents of the line in <b>text1</b>.
+<LI> It breaks up the line into words.  The <b>NF</b> field contains
+      the number of words in the field.  The first <b>NF</b> slots
+      of the <b>fields</b> array point to each of the <b>NF</b> words
+      (and these words are null-terminated).
+<LI> The <b>line</b> field contains the line number of the line.
+<LI> <b>Get_line()</b> returns the <b>NF</b> field as its return value.
+<LI> It returns -1 when it reaches the end of the file.
+</UL>
+<b>Jettison_inputstruct()</b> closes the file associated with the <b>IS</b>
+and deallocates (frees) the <b>IS</b>.  Do not worry about 
+<b>pipe_inputstruct()</b> for now. 
+
+<p>
+<hr>
+These procedures are very convenient for processing input files.  For
+example, the following program (in 
+<b><a href=src/printwords.c>src/printwords.c</a></b>)
+prints out every word of an input file prepended with its line number:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* Use the fields library to print each word on standard input, labeled with its line number. */</font>
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include "fields.h"
+
+int main(int argc, char **argv)
+{
+  IS is;
+  int i;
+
+  if (argc != 2) { fprintf(stderr, "usage: printwords filename\n"); exit(1); }
+ 
+  <font color=blue>/* Open the file as an inputstruct.  Error check. */</font>
+
+  is = new_inputstruct(argv[1]);
+  if (is == NULL) {
+    perror(argv[1]);
+    exit(1);
+  }
+
+  <font color=blue>/* Read each line with get_line().  Print out each word. */</font>
+
+  while(get_line(is) &gt;= 0) {
+    for (i = 0; i &lt; is-&gt;NF; i++) {
+      printf("%d: %s\n", is-&gt;line, is-&gt;fields[i]);
+    }
+  }
+
+  <font color=blue>/* Free up the memory allocated with new_inputstruct, and
+     close the open file.  This is not necessary in this program, 
+     since we are exiting anyway, but I just want to show how you free it up. */</font>
+
+  jettison_inputstruct(is);
+  return 0;
+}
+</pre></td></table></center><p>
+So, for example, if the file <a href=txt/rex-1.txt><b>txt/rex-1.txt</b></a> 
+contains the following three lines:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+June: Hi ... I missed you!
+Rex:  Same here!  You're all I could think about!
+June: I was?
+</pre></td></table></center><p>
+
+Then running <b>printwords</b> on <b>rex-1.txt</b> results in the following output:
+
+<pre>
+UNIX> <font color=darkred><b>bin/printwords txt/rex-1.txt</b></font>
+1: June:
+1: Hi
+1: ...
+1: I
+1: missed
+1: you!
+2: Rex:
+2: Same
+2: here!
+2: You're
+2: all
+2: I
+2: could
+2: think
+2: about!
+3: June:
+3: I
+3: was?
+UNIX>
+</pre>
+
+<hr>
+<h3>Malloc is only called during new_inputstruct()</h3>
+
+One important thing to note about the fields library is that the <i>only</i>
+time that <b>malloc()</b> is called is during
+<b>new_inputstruct()</b>.  <b>Get_line()</b>
+simply fills in the fields of the <b>IS</b> structure --- it does <i>not</i>
+perform memory allocation.  This means that if you want to store a line or
+its fields, and not have it be overwritten by the next <b>get_line()</b>
+call, then you need to make a copy of it, typically with <b>strdup()</b>.
+<p>
+This is very important, so please pay attention to this.  <i>The most common mistake
+that students make with the fields library, and with <b>fgets()</b> in general, is
+not to make a copy when they need a copy.</i>  I'm going to illustrate that bug
+here, which will also help you with pointers and <b>malloc()</b>.
+<p>
+Our goal will be to write the program <b>tail</b>, which prints the last <i>n</i>
+lines of standard input.  The value of <i>n</i> defaults to 10, but you should be
+able to specify it on the command line.  Let's start by writing 
+<b><a href=src/tail10-bad.c>src/tail10-bad.c</a></b>,
+which will attempt to print out the last 10 lines using the fields library.  This
+will illustrate the common bug that I'm talking about above.  Here's the code,
+which is pretty straightforward.  We'll have an array of 10 <b>char *</b>'s, 
+which we'll simply set to <b>is->text1</b> whenever we read each line:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* A buggy program to print the last 10 lines of standard input. */</font>
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include "fields.h"
+
+int main(int argc, char **argv) 
+{
+  IS is;
+  int i, n;
+  char *lines[10];    <font color=blue>/* This array will hold the last 10 lines of standard input. */</font>
+  
+  <font color=blue>/* Read the lines of standard input, and only keep the last ten. */</font>
+
+  is = new_inputstruct(NULL);
+  n = 0;
+  while (get_line(is) &gt;= 0) {
+    lines[n%10] = is-&gt;text1;        <font color=blue>/* This is the bad line -- it doesn't copy the string. */</font>
+    n++;
+  }
+
+  <font color=blue>/* Print the last 10 lines, or fewer if there are fewer lines. 
+     Remember that is-&gt;text1 has a newline at the end. */</font>
+
+  i = (n &gt;= 10) ? (n-10) : 0;                      <font color=blue>/* This is the line number of the 10th line from the end. */</font>
+  for ( ; i &lt; n; i++) printf("%s", lines[i%10]);   <font color=blue>/* Print this line to the last line. */</font>
+
+  return 0;
+}
+</pre></td></table></center><p>
+
+I have an input file with 15 lines full of random names.  Take a look at what
+happens when I run <b>tail10-bad</b> on it:
+
+<p><center><table border=3 cellpadding=3><td valign=top><pre>
+UNIX> <font color=darkred><b>cat txt/tail-input-15.txt</b></font>
+     1	Elijah Christian Shatterproof
+     2	Cameron Ostracod
+     3	Ryan Sargent
+     4	Christopher Tempest
+     5	Aiden Circumferential
+     6	Carson Carcass
+     7	Caroline Jazz
+     8	Molly Jade
+     9	Jordan Equivalent MD
+    10	Aaron Nagging
+    11	Isaac Bandwidth
+    12	Leah Bulk
+    13	Victoria Glutamate
+    14	Lucas Workmen
+    15	Sofia Godlike
+UNIX> <font color=darkred><b></b></font>
+</pre></td>
+<td valign=top><pre>
+UNIX> <font color=darkred><b>bin/tail10-bad < txt/tail-input-15.txt</b></font>
+    15	Sofia Godlike
+    15	Sofia Godlike
+    15	Sofia Godlike
+    15	Sofia Godlike
+    15	Sofia Godlike
+    15	Sofia Godlike
+    15	Sofia Godlike
+    15	Sofia Godlike
+    15	Sofia Godlike
+    15	Sofia Godlike
+UNIX> <font color=darkred><b></b></font>
+</pre></td></table></center><p>
+
+That looks like a bug to me -- what has happened is that each entry of <b>lines</b> points
+to the same <b>(char *)</b> -- this is <b>is->text1</b>, which gets overwritten by each 
+<b>get_line()</b> call.    
+<p>
+To highlight this, 
+in <b><a href=src/tail10-bad-print.c>src/tail10-bad-print.c</a></b>,
+I have put the following print statement right after I set <b>lines[n%10]</b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+    printf("I have set lines[%d] to 0x%lx, which is currently %s",
+           n%10, (unsigned long) (lines[n%10]), lines[n%10]);
+</pre></td></table></center><p>
+
+You can see, when I run this, that every entry of <b>lines</b> is equal to the same pointer,
+which is getting overwritten at each <b>get_line()</b> call:
+
+<pre>
+UNIX> <font color=darkred><b>bin/tail10-bad-print < txt/tail-input-15.txt</b></font>
+I have set lines[0] to 0x7fc014002614, which is currently      1	Elijah Christian Shatterproof
+I have set lines[1] to 0x7fc014002614, which is currently      2	Cameron Ostracod
+I have set lines[2] to 0x7fc014002614, which is currently      3	Ryan Sargent
+I have set lines[3] to 0x7fc014002614, which is currently      4	Christopher Tempest
+I have set lines[4] to 0x7fc014002614, which is currently      5	Aiden Circumferential
+I have set lines[5] to 0x7fc014002614, which is currently      6	Carson Carcass
+I have set lines[6] to 0x7fc014002614, which is currently      7	Caroline Jazz
+I have set lines[7] to 0x7fc014002614, which is currently      8	Molly Jade
+I have set lines[8] to 0x7fc014002614, which is currently      9	Jordan Equivalent MD
+I have set lines[9] to 0x7fc014002614, which is currently     10	Aaron Nagging
+I have set lines[0] to 0x7fc014002614, which is currently     11	Isaac Bandwidth
+I have set lines[1] to 0x7fc014002614, which is currently     12	Leah Bulk
+I have set lines[2] to 0x7fc014002614, which is currently     13	Victoria Glutamate
+I have set lines[3] to 0x7fc014002614, which is currently     14	Lucas Workmen
+I have set lines[4] to 0x7fc014002614, which is currently     15	Sofia Godlike
+    15	Sofia Godlike
+    15	Sofia Godlike
+    15	Sofia Godlike
+    15	Sofia Godlike
+    15	Sofia Godlike
+    15	Sofia Godlike
+    15	Sofia Godlike
+    15	Sofia Godlike
+    15	Sofia Godlike
+    15	Sofia Godlike
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+The simple fix is to use <b>strdup()</b>.  This will allocate memory for a copy of
+the line, and then copy the line.  The code is in
+<b><a href=src/tail10-memory-leak.c>src/tail10-memory-leak.c</a></b>, which as you can tell
+by its name, is going to have some issues of its own.  The only change is that we
+longer assign <b>lines[n%10]</b> to <b>is->text1</b>, but instead we make a copy with
+<b>strdup()</b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+  is = new_inputstruct(NULL);
+  n = 0;
+  while (get_line(is) &gt;= 0) {
+    lines[n%10] = strdup(is->text1);       <font color=blue>/* This is the only change - we call strdup(). */</font>
+    n++;
+  }
+}
+</pre></td></table></center><p>
+
+It runs fine on <b>tail-input-15.txt</b>:
+
+<pre>
+UNIX> <font color=darkred><b>bin/tail10-memory-leak < txt/tail-input-15.txt </b></font>
+     6	Carson Carcass
+     7	Caroline Jazz
+     8	Molly Jade
+     9	Jordan Equivalent MD
+    10	Aaron Nagging
+    11	Isaac Bandwidth
+    12	Leah Bulk
+    13	Victoria Glutamate
+    14	Lucas Workmen
+    15	Sofia Godlike
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+In fact, it will run just fine on most input.  However, as intimated by its name, it
+has a memory leak.  Whenever <i>n</i> is greater than or equal to 10, the <b>strdup()</b>
+line overwrites the pointer that is currently in <b>lines[n%10]</b>, and the pointer is
+gone forever.  The memory that it points to, however, is still allocated, and will not be
+deallocated until the program exits.  That is the very definition of a memory leak.
+If we run this on input with a lot of lines, the memory usage of the program will blow up,
+eventually grinding your machine to a halt and/or terminating when <b>strdup()</b> fails.
+<p>
+You can try this on your own machine.  This is on my mac --the <b>awk</b> script
+prints an infinite number of lines with X's, and we pipe that to <b>bin/tail10-memory-leak</b>:
+
+<pre>
+UNIX> <font color=darkred><b>echo "" | awk '{ while (1) print "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" }' | bin/tail10-memory-leak  &</b></font>
+</pre>
+
+Then, I take a look at how the program is running with <b>top</b>:
+
+<pre>
+UNIX> <font color=darkred><b>top</b></font>
+PID    COMMAND      %CPU  TIME     #TH   #WQ  #PORT MEM    PURG   CMPRS  PGRP  PPID  STATE
+.....  All my running processes ....
+</pre>
+
+Here is how the program is running at 6 seconds, 30 seconds and 60 seconds:
+
+<pre>
+84909  tail10-memor 99.8  00:06.13 1/1   0    12    745M+  0B     0B     84907 79428 running
+...
+84909  tail10-memor 99.8  00:30.87 1/1   0    12    3807M+ 0B     0B     8490  79428 running
+...
+84909  tail10-memor 99.8  01:00.83 1/1   0    12    7469M+ 0B     0B     84907 79428 running
+</pre>
+
+The "745M+" says that at 6 seconds, the process is consuming 745 Megabytes of memory.  As you 
+can see, that number goes up to 3.8 GB, and 7.4 GB.  It shouldn't be consuming any memory,
+since it only needs to maintain the last 10 lines at any point.  
+<p>
+So, let's fix it.  <b>strdup()</b> calls <b>malloc()</b>, so when you no longer need the
+string, and are about to overwrite the pointer, free the string.  Here's the changed code
+(in <b><a href=src/tail10-good.c>src/tail10-good.c</a></b>):
+
+<p><center><table border=3 cellpadding=3><td><pre>
+  is = new_inputstruct(NULL);
+  n = 0;
+  while (get_line(is) &gt;= 0) {
+    if (n &gt;= 10) free(lines[n%10]);    <font color=blue>/* This line prevents the memory leak. */</font>
+    lines[n%10] = strdup(is-&gt;text1);
+    n++;
+  }
+</pre></td></table></center><p>
+
+Now, when we run it on the infinte input, you'll see that the process size stays stable
+at 492 KBytes (why this brain-dead program needs half a meg of memory is beyond me, but
+that's life...)
+
+<pre>
+PID    COMMAND      %CPU  TIME     #TH   #WQ  #PORT MEM    PURG   CMPRS  PGRP  PPID  STATE
+85101  tail10-good  99.7  00:07.44 1/1   0    12    492K   0B     0B     85099 79428 running
+...
+85101  tail10-good  99.9  00:30.15 1/1   0    12    492K   0B     0B     85099 79428 running
+...
+85101  tail10-good  99.9  01:00.11 1/1   0    12    492K   0B     0B     85099 79428 running
+</pre>
+
+<hr>
+<h2>tailanyf</h2>
+<font color=red>I often don't go over this program in class.  It is a straightforward extension
+of the program <b>tail10-good.c</b>.</font>
+<p>
+
+Here's the general version of <b>tail</b>, where you specify the number of lines on the
+command line.  This program illustrates a few things that you should be getting used to:
+
+<UL>
+<LI> Using <b>sscanf()</b> to convert a string to an integer and test to see if it worked.
+<LI> Using <b>malloc()</b> to allocate an array whose size isn't known until runtime.
+<LI> Using the fields library, and using <b>strdup()</b> to store a copy of a string.
+</UL>
+
+The program is in 
+<b><a href=src/tailanyf.c>src/tailanyf.c</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* This program is more like tail -- it takes the number of lines, n, 
+   as a command line argument, and prints the last n lines of standard input. */</font>
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include "fields.h"
+
+int main(int argc, char **argv)
+{
+  char **lastn;
+  int nlines, i, n;
+  IS is;
+
+  <font color=blue>/* Error check the command line. */</font>
+
+  if (argc != 2) { fprintf(stderr, "usage: tailany1 n\n"); exit(1); }
+  if (sscanf(argv[1], "%d", &n) == 0 || n &lt;= 0) {
+    fprintf(stderr, "usage: tailany1 n\n");
+    fprintf(stderr, "       bad n: %s\n", argv[1]);
+    exit(1);
+  }
+
+  <font color=blue>/* Allocate the array */</font>
+
+  lastn = (char **) malloc(sizeof(char *)</font>*n);
+  if (lastn == NULL) { perror("malloc"); exit(1); }
+ 
+  <font color=blue>/* Allocate the IS */</font>
+
+  is = new_inputstruct(NULL);
+  if (is == NULL) { perror("stdin"); exit(1); }
+
+  <font color=blue>/* Read the input */</font>
+
+  nlines = 0;
+  while (get_line(is) &gt;= 0) {
+    if (nlines &gt;= n) free(lastn[nlines%n]);     <font color=blue>/* Prevent the memory leak. */</font>
+    lastn[nlines%n] = strdup(is-&gt;text1);
+    nlines++;
+  }
+
+  <font color=blue>/* Print the last n lines */</font>
+
+  i = (nlines &lt; n) ? 0 : nlines-n;
+  for ( ; i &lt; nlines; i++) {
+    printf("%s", lastn[i%n]);
+  }
+
+  <font color=blue>/* Don't bother freeing stuff when you're just exiting anyway. */</font>
+
+  return 0;
+}
+
+</pre></td></table></center><p>
+
+</pre></td></table></center><p>
+
+<hr>
+<h2>pipe_inputstruct()</h2>
+<font color=red>I also don't typically go over this program in class, but just keep
+it here for reference in case you want to use <b>pipe_inputstruct()</b>.</font>
+<p>
+
+This lets you read from a pipe that gets opened with <b>popen()</b>.
+The program 
+<b><a href=src/pipetest.c>src/pipetest.c</a></b>
+uses <b>pipe_inputstruct()</b> to 
+count the number of lines in all the <b>.c</b> files in the  
+<b>src</b> directory.
+It does this by using <b>pipe_inputstruct()</b> to get
+the standard output of "<tt>cat src/*.c</tt>" into an <b>inputstruct</b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* pipetest.c counts the number of lines in all the .c files in the  
+   src directory.  It does this by using pipe_inputstruct to get
+   the standard output of the cat command into an inputstruct */</font>
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include "fields.h"
+
+int main()
+{
+  IS is;
+  int nlines;
+
+  is = pipe_inputstruct("cat src/*.c");
+  if (is == NULL) { perror("cat src/*.c"); exit(1); }
+
+  nlines = 0;
+  while (get_line(is) &gt;= 0) nlines++;
+
+  printf("# lines in src/*.c: %d\n", nlines);
+ 
+  return 0;
+}
+</pre></td></table></center><p>
+
+In case you were wondering what happens when you put "/*" into a string -- this does compile
+and run correctly.  Would you have bet a family member on that?

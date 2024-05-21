@@ -1,0 +1,296 @@
+<title>CS360 Lecture notes -- The Jval Type</title>
+<body bgcolor=ffffff>
+<h2>
+<a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs360>CS360</a>
+Lecture Notes -- The Jval Type</a></h2>
+<UL>
+<LI><a href=http://web.eecs.utk.edu/~jplank>James Plank</a>
+<LI>Directory: <b>~jplank/cs360/notes/Jval</b>
+<LI>Lecture notes:
+    <a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs360/360/notes/Jval>
+    <b>http://web.eecs.utk.edu/~jplank/plank/classes/cs360/360/notes/Jval</b></a>
+<LI> Original Notes: Tue Oct 13 10:07:44 EDT 1998
+<LI> Latest Modification: Fri Jan 29 14:36:05 EST 2021
+</UL>
+
+
+<hr>
+<h2>The Jval type</h2>
+
+In 
+<a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs360/360/include/jval.h><b>jval.h</b></a>, 
+I define a type called a <b>Jval</b>.  This is a big union:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+typedef union {
+    int i;
+    long l;
+    float f;
+    double d;
+    void *v;
+    char *s;
+    char c;
+    unsigned char uc;
+    short sh;
+    unsigned short ush;
+    unsigned int ui;
+    int iarray[2];
+    float farray[2];
+    char carray[8];
+    unsigned char ucarray[8];
+  } Jval;  
+</pre></td></table></center><p>
+
+In case you don't know, a union is like a struct, except you can only use one of the fields at a time.
+In other words, if you have a <b>Jval</b> named <b>jv</b>, then you may set and use 
+<b>jv.i</b> as an integer, and
+<b>jv.d</b> as a double, but not both at the same time.
+<p>
+I've made use of <b>Jval</b>'s when I write generic data structures
+such as lists, and trees.  For the purposes of this class, don't worry
+about most of the fields in the union.  The only important ones are:
+<pre>
+    int i;
+    float f;
+    double d;
+    void *v;
+    char *s;
+    char c;
+</pre>
+The nice thing about a <b>Jval</b> is that you can hold one piece of 
+data in a <b>Jval</b>, regardless of what the type of that piece of
+data is.  Moreover, the <b>Jval</b> will always be 8 bytes.
+<p>
+Here's a very simple example, which is pretty unmotivated, except that it
+demonstrates the union
+(<b><a href=src/simple_jval.c>src/simple_jval.c</a></b>):
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* This program shows the very simple use of a jval. */</font>
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include "jval.h"
+
+int main()
+{
+  Jval jv;
+
+  <font color=blue>/* Set and use as an integer. */</font>
+
+  jv.i = 10;
+  printf("Using the jval as an integer: %d\n", jv.i);
+
+  <font color=blue>/* Set and use as a double. */</font>
+
+  jv.d = 5.6;
+  printf("Using the jval as a double: %.2lf\n", jv.d);
+
+  <font color=blue>/* Set and use as a char *. */</font>
+
+  jv.s = "Fred";
+  printf("Using the jval as a char *: %s\n", jv.s);
+
+  <font color=blue>/* Since I've set it as a (char *), I shouldn't use it as a double. */</font>
+
+  printf("If I now print the jval as a double, I get garbage: %lg\n", jv.d);
+  return 0;
+}
+</pre></td></table></center><p>
+
+Pay attention to that last <b>printf()</b> -- you should only use a jval using the 
+type that you used when you set its value.  That last <b>printf()</b> is treating the 8
+bytes that were set to be a pointer as a double, and accordingly you get a really
+weird number:
+
+<pre>
+UNIX> <font color=darkred><b>bin/simple_jval</b></font>
+Using the jval as an integer: 10
+Using the jval as a double: 5.60
+Using the jval as a char *: Fred
+If I now print the jval as a double, I get garbage: 2.13063e-314
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+
+<hr>
+<h2>Constructor functions</h2>
+
+You can of course, create and use a <b>Jval</b> by simply declaring and 
+using it.  For example:
+<pre>
+  Jval j;
+  
+  j.i = 4;
+</pre>
+You can freely pass <b>Jval</b>'s to and from procedure calls.  A <b>Jval</b>
+can be the return value of a procedure call.
+<p>
+<b>Jval.h</b> defines a whole bunch of prototypes for "constructor
+functions":
+<pre>
+extern Jval new_jval_i(int);
+extern Jval new_jval_f(float);
+extern Jval new_jval_d(double);
+extern Jval new_jval_v(void *);
+extern Jval new_jval_s(char *);
+</pre>
+These return <b>Jval</b>'s to you when you give them arguments
+of a specific type.  For example, if you want to initialize a <b>Jval</b>
+so that it is in integer whose value is 4, you can do it as shown above, 
+or you can do:
+<pre>
+  Jval j;
+
+  j = new_jval_i(4);
+</pre>
+Now <b>j.i</b> will be the integer 4.  This is convenient when you are using
+a procedure that takes a <b>Jval</b> as a parameter, because you can call the
+procedure and never actually declare the <b>Jval</b>.  
+Here's an example, in 
+<b><a href=src/jval_ex2.c>src/jval_ex2.c</a></b>:
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* A program that demonstrates the "constructor" functions, and how they help
+   when you are using a procedure that takes a jval as a parameter. */</font>
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include "fields.h"
+#include "jval.h"
+
+<font color=blue>/* Print a jval as an integer, double or string. */</font>
+
+void print_jval(Jval jv, char how)
+{
+  switch (how) {
+    case 'i': printf("%d\n", jv.i); break;
+    case 'd': printf("%lg\n", jv.d); break;
+    case 's': printf("%s\n", jv.s); break;
+    default: fprintf(stderr, "Bad 'how' variable in print_jval: %c\n", how);
+             exit(1);
+  }
+}
+
+<font color=blue>/* Call print_jval.  Note that I never have to declare a jval, because I'm using the constructors. */</font>
+int main()
+{
+  print_jval(new_jval_i(10), 'i');
+  print_jval(new_jval_d(5.6), 'd');
+  print_jval(new_jval_s("Fred"), 's');
+  return 0;
+}
+</pre></td></table></center><p>
+<p>
+
+<pre>
+UNIX> <font color=darkred><b>bin/jval_ex2</b></font>
+10
+5.6
+Fred
+UNIX> <font color=darkred><b></b></font>
+</pre>
+
+<hr>
+<h2>Abusing Jval's</h2>
+
+The purpose of the <b>Jval</b> type is to make general purpose data
+structures such as dllists and red-black trees as flexible
+and efficient as possible.  You
+should not use <b>Jval</b>'s in your code for any other reason.
+<p>
+Specifically, you are not to say, use a <b>Jval</b> instead of an 
+<b>int</b> in your code just because it works.  That makes your code
+unreadable, and unreadability is majorly bad.  Here is an example
+of bad code to average all of the integers on standard input
+(<b><a href=src/badavg.c>src/badavg.c</a></b>):
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* A program that abuses jvals.  It averages integers on standard input. */</font>
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include "jval.h"
+
+int main()
+{
+  Jval total;      <font color=blue>/* You'll note, no types other than Jvals. */</font>
+  Jval j;
+  Jval n;
+
+  n.i = 0;         <font color=blue>/* n and j are always treated as ints.  They should be ints. */</font>
+  total.i = 0;     <font color=blue>/* Total starts as an int */</font>
+  
+  while (scanf("%d", &(j.i)) == 1) {
+    total.i += j.i;
+    n.i++;
+  }
+
+  <font color=blue>/* And then total is used as a double.  You should simply use a double.... */</font>
+
+  total.d = ((double) total.i) / ((double) n.i);
+  printf("Average = %lf\n", total.d);
+  return 0;
+}
+
+</pre></td></table></center><p>
+
+Yes, it works, and yes, it's a cute way to use <b>total</b> as both an
+<b>int</b> and a <b>double</b>.  But it is revolting -- every use of
+<b>Jval</b>'s is bad, and if you use them in ways like these, you should be
+punished.  
+<p>
+(In case you care, the code should look as in 
+<b><a href=src/goodavg.c>src/goodavg.c</a></b>):
+
+<p><center><table border=3 cellpadding=3><td><pre>
+<font color=blue>/* The proper version of this program just uses doubles for total and n.  It's not
+   like there are ints that can't be stored in a double, and you're using floating
+   point division, so you need the doubles. */</font>
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main()
+{
+  double total;
+  double n;
+  int j;
+
+  n = 0;
+  total = 0;
+  
+  while (scanf("%d", &j) == 1) {
+    total += j;
+    n++;
+  }
+
+  if (n == 0) exit(1);
+  printf("Average = %lf\n", total/n);
+
+  return 0;
+}
+
+</pre></td></table></center><p>
+<hr>
+<h2>Accessor functions</h2>
+
+I have put accessor functions into <b>jval.h</b>/<b>jval.c</b>.  An
+accessor function simply lets you get the desired value out of a 
+<b>Jval</b> by calling a function rather than accessing the field.
+Why would you want to do this?  Well, like the constructor functions,
+it makes life easier in certain circumstances (when you are using 
+a <b>Jval</b> that is returned from a procedure.  The accessor functions
+are:
+<pre>
+extern int    jval_i(Jval);
+extern long   jval_l(Jval);
+extern float  jval_f(Jval);
+extern double jval_d(Jval);
+extern void  *jval_v(Jval);
+extern char  *jval_s(Jval);
+extern char   jval_c(Jval);
+...
+</pre>
+So, for example, calling <b>jval_i(j)</b> is the same as using <b>j.i</b>.

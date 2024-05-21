@@ -1,0 +1,68 @@
+<title>CS360 Lecture notes -- Libfdr: Jvals, Fields, Dllists, Red-Black Trees</title>
+<body bgcolor=ffffff>
+<h1>
+<a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs360>CS360</a>
+Lecture notes -- Libfdr: Jvals, Fields, Dllists, Red-Black Trees</a></h1>
+<LI><a href=http://web.eecs.utk.edu/~jplank>James S. Plank</a>
+<LI>Directory: <b>~jplank/cs360/notes/Libfdr</b>
+<LI>Lecture notes:
+    <a href=http://web.eecs.utk.edu/~jplank/plank/classes/cs360/360/notes/Libfdr>
+    <b>http://web.eecs.utk.edu/~jplank/plank/classes/cs360/360/notes/Libfdr</b></a>
+<LI>
+Wed Aug 25 11:01:12 EDT 1999
+<LI> Last change: <i>
+Mon Jan 22 15:37:11 EST 2018
+</i>
+<hr>
+
+With C, you lose the C++ standard template library, which is a major drag.
+To help you, I have a 20+ year old library of helper programs, which I 
+call "Libfdr".  There are four modules that compose libdr:
+<UL>
+<LI> <a href=../Fields>Fields</a> - a library to simplify input processing
+<LI> <a href=../Jval>Jvals</a> - a generic data type
+<LI> <a href=../Dllists>Dllists</a> - a library for doubly-linked lists
+<LI> <a href=../JRB>Red-Black Trees</a> - a library for red-black trees 
+</UL>
+
+Each of these has a set of lecture notes associated with them.  You 
+should read each of these to familiarize yourself with them.  CS360 Lab 2
+makes you use all of them.
+<p>
+<hr>
+<h2>Obtaining the Source Code</h2>
+
+The source code is here in this directory, so if you have pulled the bitbucket
+repo, then you have the source code.   Type <b>make</b> to make the precompiled
+library <b>libfdr.a</b>.
+<hr>
+<h2>On the University of Tennessee EECS Machines</h2>
+
+For the purposes of CS360, I have put the header files into the directory
+<b>/home/jplank/cs360/include</b>, and a compiled library into 
+<b>/home/jplank/cs360/objs</b>.  That way, you don't have to have copies
+of the programs sprinkled all over your lab directories.  Obviously, if
+you are on a non-UT machine, you'll need to design out a way to compile
+and link the programs with your labs.  I would prefer that you put them
+into a separate directory, though, so you can simply use mine when you are
+on the EECS machines.
+
+<h3>Compilation and Linking</h3>
+
+To compile your code, you need to use the complier flag
+<b>-I/home/jplank/cs360/include</b>.  For example, if you 
+have included ``fields.h'' and ``dllist.h'' in your program <b>lab1.c</b>,
+then your first compilation step is:
+<pre>
+gcc -g -I/home/jplank/cs360/include -c lab1.c
+</pre>
+That will make <b>lab1.o</b>.  Now, when you go to link <b>lab1.o</b> into
+an executable, you need to link with 
+<b>/home/jplank/cs360/objs/libfdr.a</b>:
+<pre>
+gcc -g -o lab1 lab1.o /home/jplank/cs360/objs/libfdr.a
+</pre>
+As always, you can do all of this in a makefile to make your life easier.
+We will provide makefiles for the first few labs.  After that, you'll
+probably be on your own.
+

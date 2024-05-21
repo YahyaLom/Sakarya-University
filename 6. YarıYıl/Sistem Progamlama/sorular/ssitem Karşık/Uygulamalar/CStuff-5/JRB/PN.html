@@ -1,0 +1,31 @@
+<pre>
+*** USE scripts/pga-convert.sh to convert the "PAST_RESULTS" link on pgatour.com to the right
+    format ***
+
+- Go over the header:
+   - Class
+   - Inserts - Converts to Jval.
+   - Finds
+   - Find_gte
+   - Traversals
+
+- Write strsort   - sort stdin
+        strrsort  - sort stdin reverse (rtraverse)
+        strrsort  - sort stdin reverse (custom comparison function)
+        strusort  - cull duplicates (use find)
+        strisort  - ignore case by creating a different key
+        nsort     - use insert_int on atoi()
+        nsort2    - use general to do a secondary sort lexicographically
+        nsort3    - two level tree.
+
+ni_sort -- look at data/input-nn.txt -- create person struct and print sorted by
+           score and then name.  Output = name "%-40s" and score "%2d"
+
+           First try -- create sorting key.
+
+           Second try -- create comparison function.
+
+           Third try -- two-level tree.
+
+Talk briefly about the golf program but don't worry about it -- just promote it in the lecture
+     notes.
