@@ -1,1 +1,0 @@
-ALINAN NOT: 100
