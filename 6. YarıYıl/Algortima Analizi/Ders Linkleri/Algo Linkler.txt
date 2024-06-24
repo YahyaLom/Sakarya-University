@@ -1,0 +1,35 @@
+Algo Linkler
+/////////////////////////////////////////////////////////////////////////////
+
+Greedy İle Dinamik vs + Sırt Çantası Problemi çözümü
+---------------------------------------------------------------
+
+https://obs.sabis.sakarya.edu.tr/SanalSinif/Katil/388253
+https://bbbmain3.uzep.org/playback/presentation/2.3/56fd746738e2317da17bc207b0ccba8e4354d3f2-1619953156299?meetingId=56fd746738e2317da17bc207b0ccba8e4354d3f2-1619953156299
+https://bbbvmain2.sabis.sakarya.edu.tr/playback/presentation/2.3/36d67f788ad85d77d283ad397491ddbe4d05912c-1620471599322?meetingId=36d67f788ad85d77d283ad397491ddbe4d05912c-1620471599322
+
+________________________________________________________________________________________
+
+Floyd Warshall
+----------------------------------------------------------------------------------
+
+https://bbbvmain3.sakarya.edu.tr/playback/presentation/2.3/fb107eba2520e34d0e8d05e250230e6f12c630a7-1681736842431
+https://bbbvmain2.sabis.sakarya.edu.tr/playback/presentation/2.3/36d67f788ad85d77d283ad397491ddbe4d05912c-1620471599322?meetingId=36d67f788ad85d77d283ad397491ddbe4d05912c-1620471599322
+________________________________________________________________________________________
+
+Polinom Hesabı
+---------------------------------------------------------------------
+https://bbbmain4.uzep.org/playback/presentation/2.3/eeba977c935eaba7fabaa23ef7bf72c5a51bcc39-1620763253850?meetingId=eeba977c935eaba7fabaa23ef7bf72c5a51bcc39-1620763253850
+https://bbbmain5.uzep.org/playback/presentation/2.3/37faceeedbda68f29b425fb6faed13ddc3cdf555-1684425607488
+
+__________________________________________________________________________________________
+
+Binary Exponantion 
+-----------------------------------------------------------------------
+https://bbbmain5.uzep.org/playback/presentation/2.3/37faceeedbda68f29b425fb6faed13ddc3cdf555-1684425607488
+
+_________________________________________________________________________________
+
+B2-3 trees
+--------------------------------------------------------------------------
+https://bbbmain5.uzep.org/playback/presentation/2.3/c868d320ade06ea1b851973ae61eb2673fca60ee-1685642421339

@@ -1,0 +1,11 @@
+h1: https://obs.sabis.sakarya.edu.tr/SanalSinif/Katil/388244
+h2: https://obs.sabis.sakarya.edu.tr/SanalSinif/Katil/388245
+h3: https://obs.sabis.sakarya.edu.tr/SanalSinif/Katil/388246
+h4: https://obs.sabis.sakarya.edu.tr/SanalSinif/Katil/469997
+h5: https://obs.sabis.sakarya.edu.tr/SanalSinif/Katil/470996
+h6: https://obs.sabis.sakarya.edu.tr/SanalSinif/Katil/472093
+h7: https://obs.sabis.sakarya.edu.tr/SanalSinif/Katil/472641 -> dinamik programlama
+h8: https://obs.sabis.sakarya.edu.tr/SanalSinif/Katil/473479 - sırt çantası Floyd warshall 
+h10: https://obs.sabis.sakarya.edu.tr/SanalSinif/Katil/388253 -> greedy yaklaşımı 
+h11: https://obs.sabis.sakarya.edu.tr/SanalSinif/Katil/388254 -> dinamik programlama
+h12: https://obs.sabis.sakarya.edu.tr/SanalSinif/Katil/388255 -> binary exponantion

@@ -1,0 +1,47 @@
+Hafta 1
+https://bbbmain2.uzep.org/playback/presentation/2.3/c83adfbb8037ac466b99897ce5d42394874ba1db-1614013020133?meetingId=c83adfbb8037ac466b99897ce5d42394874ba1db-1614013020133
+
+Hafta 2
+https://bbbmain2.uzep.org/playback/presentation/2.3/529535f4b93b1753ba5897801d4366c85cba2ce4-1615222728314?meetingId=529535f4b93b1753ba5897801d4366c85cba2ce4-1615222728314
+
+Hafta3
+https://bbbvmain2.sabis.sakarya.edu.tr/playback/presentation/2.3/a77aa990fbadbdaf1e35621b03fe01fff7dcb871-1615827534617?meetingId=a77aa990fbadbdaf1e35621b03fe01fff7dcb871-1615827534617
+--> insertion sort + quick
+
+Hafta 4
+https://bbbmain3.uzep.org/playback/presentation/2.3/2254324079d69e5bfb2d600db056b610e156e21c-1616432321609?meetingId=2254324079d69e5bfb2d600db056b610e156e21c-1616432321609
+--> Quick sort merge sort
+
+Hafta 4-5 Master Teroemi 
+https://bbbmain5.uzep.org/playback/presentation/2.3/a09e2a27f047c5ad61163847b6596c6f37b9ba3d-1680186597960
+
+Hafta 5
+https://bbbmain4.uzep.org/playback/presentation/2.3/5d3d4c7188694b82aa386c2544b03eed337895c0-1617641905667?meetingId=5d3d4c7188694b82aa386c2544b03eed337895c0-1617641905667
+--> Dinamik Programlama
+
+Hafta 6
+https://bbbmain2.uzep.org/playback/presentation/2.3/9f12512f13338c8b5b9e0df29c5192414432aca7-1621875574230
+
+Hafta 7
+https://bbbvmain2.sabis.sakarya.edu.tr/playback/presentation/2.3/cf0a9a0112e4502cf6986f6089a5e0adb3018e05-1616513352575?meetingId=cf0a9a0112e4502cf6986f6089a5e0adb3018e05-1616513352575
+
+Hafta 8
+https://bbbmain2.uzep.org/playback/presentation/2.3/6f964effdc49b1a7cc5b5276061e7a9577b01a73-1617723188025?meetingId=6f964effdc49b1a7cc5b5276061e7a9577b01a73-1617723188025
+
+Hafta 9
+https://bbbmain4.uzep.org/playback/presentation/2.3/8dd4c3d275decdaf76582f765b8f32c01c931987-1614967201719?meetingId=8dd4c3d275decdaf76582f765b8f32c01c931987-1614967201719
+//Zincir Matris Çarpımı
+
+Hafta 10
+https://bbbmain2.uzep.org/playback/presentation/2.3/7482170023cc5a89b43d39a49089c9990176d875-1619348379749?meetingId=7482170023cc5a89b43d39a49089c9990176d875-1619348379749
+//LCS
+
+Hafta 11
+https://bbbmain3.uzep.org/playback/presentation/2.3/56fd746738e2317da17bc207b0ccba8e4354d3f2-1619953156299?meetingId=56fd746738e2317da17bc207b0ccba8e4354d3f2-1619953156299
+//Sırt Çantası Problemi
+
+Hafta 12
+https://bbbvmain2.sabis.sakarya.edu.tr/playback/presentation/2.3/36d67f788ad85d77d283ad397491ddbe4d05912c-1620471599322?meetingId=36d67f788ad85d77d283ad397491ddbe4d05912c-1620471599322
+
+Hafta 13
+https://bbbmain4.uzep.org/playback/presentation/2.3/eeba977c935eaba7fabaa23ef7bf72c5a51bcc39-1620763253850?meetingId=eeba977c935eaba7fabaa23ef7bf72c5a51bcc39-1620763253850
