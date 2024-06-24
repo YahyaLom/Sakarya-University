@@ -1,0 +1,11 @@
+
+hello everyone ı am yahya and my topic is Pointer.
+Pointer is a variable so ı am starting this point.
+what is it variable ? this is first question.
+developer uses data while writing a programm and every data has a different variables.  there are variables int char etc.
+second question is what is it pointer, pointer is a variable. main function of the pointer  is to hold adress. pointer hold the memory location of another variables, functions datas and even another pointers.
+
+pointer definition is easy. we have pointed type area, after that area,  you must use asteriks symbol. and you should give a name. don t forget this name should not be same other variables.
+
+the big deal pointer usage
+we have a small example.firs of all we have a int variable and this variables names is num and num equlas 5. than we have a pointer variable, and this pointer s name is ptr. and ptr 
